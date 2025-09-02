@@ -10,7 +10,7 @@ O projeto será desenvolvido em **7 fases**, cada uma com objetivos específicos
 
 1. **Batalhamento de Dados – Mapeando o Coração Moderno**  
    Consolidação de dados numéricos, textuais e visuais.  
-   [📖 Leia mais](docs/fase1/README.md)
+   [📖 Leia mais]([docs/fase1/README.md](https://github.com/Fiap-Team-1tiaor-2024/cardio-ai/tree/main/src/docs/fase1))
 
 2. **Diagnóstico Automatizado – IA no Estetoscópio Digital**  
    Desenvolvimento de classificadores para identificação de riscos.
