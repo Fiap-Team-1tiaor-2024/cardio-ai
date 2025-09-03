@@ -57,9 +57,9 @@ Foram coletados textos institucionais e científicos no formato .txt contendo li
 - Estratégias de prevenção.
 
 ### Como podem ser explorados em NLP
-Extração de sintomas a partir de descrições médicas.
-Classificação de tópicos (prevenção, diagnóstico, tratamento).
-Análise de sentimentos em conteúdos de conscientização pública.
+- Extração de sintomas a partir de descrições médicas.
+- Classificação de tópicos (prevenção, diagnóstico, tratamento).
+- Análise de sentimentos em conteúdos de conscientização pública.
 
 ### Relevância para IA
 A análise textual permite criar assistentes virtuais ou chatbots cardiológicos capazes de interagir com pacientes, responder dúvidas e oferecer recomendações baseadas em informações científicas confiáveis.
@@ -73,9 +73,9 @@ A análise textual permite criar assistentes virtuais ou chatbots cardiológicos
 O dataset contém imagens de eletrocardiogramas (ECGs) classificados em diferentes categorias (normal, arritmia, etc.), totalizando mais de 100 registros.
 
 ### Como podem ser explorados em Visão Computacional
-Detecção de padrões em sinais elétricos do coração.
-Identificação de anomalias como arritmias e bloqueios cardíacos.
-Classificação automática de exames entre normais e patológicos.
+- Detecção de padrões em sinais elétricos do coração.
+- Identificação de anomalias como arritmias e bloqueios cardíacos.
+- Classificação automática de exames entre normais e patológicos.
 
 ### Relevância para IA
 A análise de exames por algoritmos de visão computacional pode auxiliar médicos no diagnóstico precoce, reduzindo erros e acelerando a triagem de pacientes.

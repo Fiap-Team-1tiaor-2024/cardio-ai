@@ -1,4 +1,4 @@
-# 🫀 CardiolA – Plataforma de Inteligência Cardíaca
+# 🫀 Cardio AI – Plataforma de Inteligência Cardíaca
 
 Este repositório contém o desenvolvimento de um projeto acadêmico voltado para a aplicação de **Inteligência Artificial em doenças cardiovasculares**.  
 O objetivo é construir uma solução de ponta a ponta, desde a **coleta e organização de dados** até a entrega de uma **plataforma integrada** com diferentes técnicas de IA.
