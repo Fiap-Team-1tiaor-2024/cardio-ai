@@ -67,18 +67,38 @@ A análise textual permite criar assistentes virtuais ou chatbots cardiológicos
 
 ## 🖼️ Parte 3 – Dados Visuais (Visão Computacional)
 
-- **Fonte do dataset**: [ECG Images Dataset – Kaggle](https://www.kaggle.com/datasets/jayaprakashpondy/ecgimages/data)  
-
 ### Origem dos Dados
-O dataset contém imagens de eletrocardiogramas (ECGs) classificados em diferentes categorias (normal, arritmia, etc.), totalizando mais de 100 registros.
+Foram utilizados três conjuntos de imagens médicas complementares:  
+
+1. **ECG Images Dataset – Kaggle**  
+   [Link](https://www.kaggle.com/datasets/jayaprakashpondy/ecgimages/data)  
+   Contém imagens de eletrocardiogramas (ECGs) classificados em diferentes categorias (normal, arritmia, etc.), com mais de 100 registros.  
+
+2. **Raio-X de Doenças Pulmonares – Kaggle**  
+   [Link](https://www.kaggle.com/datasets/alexsanderlindolfo/raio-x-de-doenas-pulmonares-completo)  
+   Conjunto de exames de raio-X torácico, úteis para identificar doenças pulmonares que impactam indiretamente o sistema cardiovascular.  
+
+3. **Annotated X-Ray Angiography Dataset – Kaggle**  
+   [Link](https://www.kaggle.com/datasets/nikitamanaenkov/annotated-x-ray-angiography-dataset)  
+   Contém imagens de angiografia anotadas, diretamente relacionadas à detecção de obstruções e anomalias nos vasos coronários.  
+
+---
 
 ### Como podem ser explorados em Visão Computacional
-- Detecção de padrões em sinais elétricos do coração.
-- Identificação de anomalias como arritmias e bloqueios cardíacos.
-- Classificação automática de exames entre normais e patológicos.
+- Detecção de padrões em ECGs e angiogramas.  
+- Identificação de anomalias como arritmias, bloqueios cardíacos e obstruções coronárias.  
+- Estudo do impacto indireto de doenças pulmonares sobre o coração.  
+- Classificação automática de exames entre normais e patológicos.  
+
+---
 
 ### Relevância para IA
-A análise de exames por algoritmos de visão computacional pode auxiliar médicos no diagnóstico precoce, reduzindo erros e acelerando a triagem de pacientes.
+O uso de múltiplos exames visuais permite enriquecer os modelos de IA com dados complementares:  
+- **ECG** → capta sinais elétricos do coração.  
+- **Raio-X** → auxilia na análise de condições pulmonares que afetam o sistema cardiovascular.  
+- **Angiografia** → detecta diretamente obstruções nas artérias coronárias, principal causa de infarto.  
+
+Essa diversidade de dados melhora a robustez dos algoritmos, possibilitando diagnósticos mais completos e suporte eficiente na tomada de decisão médica.
 
 
 ## ✅ Conclusão da Fase 1
