@@ -5,7 +5,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
 # Ler CSV expandido
-df = pd.read_csv("frases_risco_expandido.csv")
+df = pd.read_csv("src/dados/frases_risco_expandido.csv")
 
 # Features e labels
 X = df["frase"]
@@ -36,7 +36,12 @@ novas_frases = [
     "falta de ar e tontura repentina",
     "me sinto cansado, mas nada grave",
     "batimentos cardíacos acelerados e suor frio",
-    "leve dor de cabeça e cansaço"
+    "leve dor de cabeça e cansaço",
+    "meu coração dispara de repente quando estou em repouso",
+    "sinto dor de cabeça forte acompanhada de visão turva",
+    "fico com os pés e tornozelos inchados no fim do dia",
+    "meus lábios ficam arroxeados após esforço físico",
+    "acordei no meio da noite sem conseguir respirar direito"
 ]
 
 novas_vect = vectorizer.transform(novas_frases)

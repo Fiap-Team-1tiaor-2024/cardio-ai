@@ -23,6 +23,17 @@ dados = [
     ["sensação de desmaio com dor no peito", "alto risco"],
     ["palpitações intensas e falta de ar", "alto risco"],
     ["dor no peito com cansaço extremo", "alto risco"],
+    ["presença de sangue na urina", "alto risco"],
+    ["infecções respiratórias frequentes", "alto risco"],
+    ["inchaço nas pernas, barriga ou ao redor dos olhos", "alto risco"],
+    ["febre persistente", "alto risco"],
+    ["dores nas articulações e no músculo", "alto risco"],
+    ["perda de visão em um ou ambos os olhos", "alto risco"],
+    ["dor de cabeça súbita e intensa", "alto risco"],
+    ["confusão mental súbita", "alto risco"],
+    ["coloração roxa ou azulada na pele", "alto risco"],
+    ["coração acelerado", "alto risco"],
+    ["palidez súbita", "alto risco"],
 
     # BAIXO RISCO
     ["leve incômodo nas costas", "baixo risco"],
@@ -68,12 +79,12 @@ dados = [
     ["batimentos irregulares e falta de ar", "alto risco"],
     ["leve coceira e vermelhidão na pele", "baixo risco"],
     ["dor intensa no peito com tontura e suor frio", "alto risco"],
-    ["cansaço leve durante atividades diárias", "baixo risco"]
+    ["cansaço leve durante atividades diárias", "baixo risco"],
 ]
 
 # Criar DataFrame e salvar
 df = pd.DataFrame(dados, columns=["frase", "situacao"])
-csv_path = "frases_risco_expandido.csv"
+csv_path = "src/dados/frases_risco_expandido.csv"
 df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
 csv_path

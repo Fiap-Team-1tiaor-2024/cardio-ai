@@ -1,0 +1,4 @@
+# Ignorar arquivos e pastas desnecessários
+
+.venv/
+.gitignore/
