@@ -34,15 +34,10 @@ O projeto será desenvolvido em **7 fases**, cada uma com objetivos específicos
 
 ```
 src/
-└── assets/
-  ├── articles/ # Dados textuais (.txt com links de artigos)
-  ├── dataset (csv)/ # Dados numéricos
-  └── images/ # Dados visuais (.txt com link do repositório de imagens)
-  docs/
-  ├── fase1/README.md # Documentação detalhada da Fase 1
-  ├── fase2/README.md # (a ser preenchido futuramente)
-  ├── ...
-  └── fase7/README.md
+└── src/
+  ├── fase1/documentos_e_projetos_referente_a_fase1/README.md # Documentação detalhada da Fase 1
+  ├── fase2/documentos_e_projetos_referente_a_fase2/README.md # Projeto inicial de modelo preditivo
+  └── ...
 ```
 
 ## 🎯 Objetivo Geral
