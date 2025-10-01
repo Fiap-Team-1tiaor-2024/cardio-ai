@@ -30,7 +30,6 @@ with open(caminho_relatos, "w", encoding="utf-8") as f:
     for frase in relatos:
         f.write(frase + "\n")
 
-
 # Mapa expandido de sintomas e doenças (com sinônimos)
 mapa_dados = [
     ["dor no peito", "pressão no peito", "Infarto"],
