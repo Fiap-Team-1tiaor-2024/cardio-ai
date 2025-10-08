@@ -1,14 +1,32 @@
-# CardioIA - Fase 2
+# 🩺 Fase 2 – Diagnóstico Automatizado: IA no Estetoscópio Digital  
 
-Este diretório contém os projetos da Fase 2 do CardioIA.
+Esta fase representa a evolução do projeto **CardioIA**, trazendo a integração entre **inteligência artificial**, **aprendizado de máquina** e **ambientes conteinerizados**.
+  
+Aqui, o foco está na **automação do diagnóstico clínico** e na **implantação dos serviços via Docker**, permitindo uma execução padronizada e modular dos componentes da aplicação.
 
-## 🐳 Docker
+---
 
-Todos os projetos foram configurados para rodar em Docker. Você pode executar cada projeto individualmente ou todos juntos.
+## 🧠 Visão Geral  
 
-### Executar Projetos Individualmente
+A Fase 2 é composta por três módulos principais:
 
-#### Portal Web (cardio-ai-portal)
+- **🧩 cardio-ai-portal** – Portal Web desenvolvido em **Next.js**, interface principal de interação.  
+- **🧠 cardio-ai-ml** – Módulo de **Machine Learning** voltado à análise de sintomas e classificação de risco.  
+- **⚡ cardio-ai-mlp** – Modelo **Perceptron Multicamadas (MLP)** utilizado para processamento de ECG e apoio à decisão clínica.  
+
+Cada módulo é configurado para rodar de forma independente via **Docker**, mas também poderá ser orquestrado em conjunto no futuro.
+
+---
+
+## 🐳 Docker  
+
+Todos os projetos desta fase foram configurados para rodar em Docker.
+
+Você pode executar **cada módulo individualmente** ou, futuramente, **todos integrados** com `docker-compose`.
+
+### ▶️ Executar Projetos Individualmente  
+
+#### **Portal Web (cardio-ai-portal)** 
 ```bash
 cd cardio-ai-portal
 
@@ -24,15 +42,15 @@ npm run docker:up
 
 **Acesse:** http://localhost:3000
 
-Consulte [cardio-ai-portal/DOCKER-QUICKSTART.md](./cardio-ai-portal/DOCKER-QUICKSTART.md) para mais detalhes.
+📄 Consulte [cardio-ai-portal/DOCKER-QUICKSTART.md](./cardio-ai-portal/DOCKER-QUICKSTART.md) para mais detalhes.
 
 #### Outros projetos
 - **cardio-ai-ml**: Machine Learning para análise de sintomas e riscos
 - **cardio-ai-mlp**: Perceptron multicamadas para classificação ECG
 
-(Dockerfiles podem ser adicionados conforme necessário)
+> ⚙️ Dockerfiles adicionais podem ser criados conforme necessário.
 
-### Executar Todos os Projetos Juntos (Futuro)
+### 🧩 Executar Todos os Projetos Juntos (Futuro)
 
 ```bash
 # Na pasta fase2
@@ -124,3 +142,7 @@ docker system prune -a
 - [ ] Criar orquestração completa
 - [ ] Adicionar banco de dados
 - [ ] Configurar CI/CD
+
+## 📄 Licença
+
+Licenciado sob a licença MIT — consulte o arquivo LICENSE na raiz do repositório para mais informações.
