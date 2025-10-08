@@ -1,8 +1,13 @@
 import pandas as pd
+import os
+
 from rapidfuzz import fuzz
 
-relatos_file = "src/dados/relatos_pacientes.txt"
-mapa_file = "src/dados/mapa_sintomas_doencas.csv"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DADOS_DIR = os.path.join(BASE_DIR, "..", "dados")
+
+relatos_file = os.path.join(DADOS_DIR, "relatos_pacientes.txt")
+mapa_file = os.path.join(DADOS_DIR, "mapa_sintomas_doencas.csv")
 
 mapa = pd.read_csv(mapa_file)
 mapa.columns = mapa.columns.str.strip().str.lower().str.replace("ç", "c")

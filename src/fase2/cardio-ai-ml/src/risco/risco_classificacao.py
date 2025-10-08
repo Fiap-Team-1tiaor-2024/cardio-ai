@@ -1,4 +1,8 @@
 import pandas as pd
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DADOS_DIR = os.path.join(BASE_DIR, "dados")
 
 # Base simulada ampliada com sinônimos e variações
 dados = [
@@ -82,7 +86,7 @@ dados = [
 
 # Criar DataFrame e salvar
 df = pd.DataFrame(dados, columns=["frase", "situacao"])
-csv_path = "src/dados/frases_risco_expandido.csv"
-df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
-csv_path
+df.to_csv(os.path.join(BASE_DIR, "../dados/frases_risco_expandido.csv"), index=False, encoding="utf-8-sig")
+
+print("Arquivo frases_risco_expandido.csv criado com sucesso!")

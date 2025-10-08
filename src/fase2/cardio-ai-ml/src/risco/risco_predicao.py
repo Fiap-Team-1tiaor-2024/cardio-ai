@@ -1,11 +1,17 @@
 import pandas as pd
+import os
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 
-# Ler CSV expandido
-df = pd.read_csv("src/dados/frases_risco_expandido.csv")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DADOS_DIR = os.path.join(BASE_DIR, "..", "dados")
+csv_path = os.path.join(DADOS_DIR, "frases_risco_expandido.csv")
+
+df = pd.read_csv(csv_path)
+
 
 # Features e labels
 X = df["frase"]
