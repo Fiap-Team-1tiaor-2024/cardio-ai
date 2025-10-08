@@ -34,7 +34,6 @@ dados = [
     ["coloração roxa ou azulada na pele", "alto risco"],
     ["coração acelerado", "alto risco"],
     ["palidez súbita", "alto risco"],
-
     # BAIXO RISCO
     ["leve incômodo nas costas", "baixo risco"],
     ["cansaço leve após caminhar", "baixo risco"],
@@ -56,7 +55,6 @@ dados = [
     ["cansaço moderado após exercícios leves", "baixo risco"],
     ["leve dor de cabeça e cansaço", "baixo risco"],
     ["me sinto cansado, mas nada grave", "baixo risco"],
-
     # VARIAÇÕES ADICIONAIS (mistura de expressões)
     ["sinto aperto no peito e mal consigo respirar", "alto risco"],
     ["batimentos cardíacos acelerados e tontura", "alto risco"],

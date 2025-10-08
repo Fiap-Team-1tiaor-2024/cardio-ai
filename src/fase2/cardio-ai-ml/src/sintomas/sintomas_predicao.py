@@ -5,7 +5,7 @@ relatos_file = "src/dados/relatos_pacientes.txt"
 mapa_file = "src/dados/mapa_sintomas_doencas.csv"
 
 mapa = pd.read_csv(mapa_file)
-mapa.columns = mapa.columns.str.strip().str.lower().str.replace('ç', 'c')
+mapa.columns = mapa.columns.str.strip().str.lower().str.replace("ç", "c")
 
 sintomas_doencas = []
 for _, row in mapa.iterrows():
@@ -22,6 +22,7 @@ todos_sintomas = [s for sintomas, _ in sintomas_doencas for s in sintomas]
 with open(relatos_file, "r", encoding="utf-8") as f:
     relatos = [linha.strip() for linha in f if linha.strip()]
 
+
 def identificar_sintomas(frase, threshold=80):
     frase_lower = frase.lower()
     sintomas_encontrados = set()
@@ -32,6 +33,7 @@ def identificar_sintomas(frase, threshold=80):
             sintomas_encontrados.add(sintoma)
 
     return list(sintomas_encontrados)
+
 
 def sugerir_diagnostico(frase):
     frase_lower = frase.lower()
@@ -46,11 +48,14 @@ def sugerir_diagnostico(frase):
                 melhor_doenca = doenca
     return melhor_doenca
 
+
 print("=== Resultados do Diagnóstico ===\n")
 for i, frase in enumerate(relatos, 1):
     sintomas = identificar_sintomas(frase)
     diagnostico = sugerir_diagnostico(frase)
 
     print(f"Paciente {i}: {frase}")
-    print(f"  → Sintomas identificados: {', '.join(sintomas) if sintomas else 'nenhum'}")
+    print(
+        f"  → Sintomas identificados: {', '.join(sintomas) if sintomas else 'nenhum'}"
+    )
     print(f"  → Possível diagnóstico: {diagnostico}\n")

@@ -16,7 +16,9 @@ vectorizer = TfidfVectorizer()
 X_vect = vectorizer.fit_transform(X)
 
 # Dividir treino/teste
-X_train, X_test, y_train, y_test = train_test_split(X_vect, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_vect, y, test_size=0.2, random_state=42
+)
 
 # Treinar modelo
 clf = LogisticRegression(max_iter=1000)
@@ -41,7 +43,7 @@ novas_frases = [
     "sinto dor de cabeça forte acompanhada de visão turva",
     "fico com os pés e tornozelos inchados no fim do dia",
     "meus lábios ficam arroxeados após esforço físico",
-    "acordei no meio da noite sem conseguir respirar direito"
+    "acordei no meio da noite sem conseguir respirar direito",
 ]
 
 novas_vect = vectorizer.transform(novas_frases)
