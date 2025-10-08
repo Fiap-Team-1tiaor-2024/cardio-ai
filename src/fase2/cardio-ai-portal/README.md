@@ -1,4 +1,4 @@
-# CardioIA Portal
+# Cardio AI - Portal
 
 Portal de visualização de dados de pacientes, agendamentos e dashboards para diagnóstico em cardiologia.
 

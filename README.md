@@ -1,6 +1,7 @@
 # 🫀 Cardio AI – Plataforma de Inteligência Cardíaca
 
-Este repositório contém o desenvolvimento de um projeto acadêmico voltado para a aplicação de **Inteligência Artificial em doenças cardiovasculares**.  
+Este repositório contém o desenvolvimento de um projeto acadêmico voltado para a aplicação de **Inteligência Artificial em doenças cardiovasculares**.
+
 O objetivo é construir uma solução de ponta a ponta, desde a **coleta e organização de dados** até a entrega de uma **plataforma integrada** com diferentes técnicas de IA.
 
 
@@ -10,10 +11,11 @@ O projeto será desenvolvido em **7 fases**, cada uma com objetivos específicos
 
 1. **Batalhamento de Dados – Mapeando o Coração Moderno**  
    Consolidação de dados numéricos, textuais e visuais.  
-   [📖 Leia mais](src/docs/fase1/README.md)
+   [📖 Leia mais](./src/fase1/README.md) 
 
 2. **Diagnóstico Automatizado – IA no Estetoscópio Digital**  
    Desenvolvimento de classificadores para identificação de riscos.
+   [📖 Leia mais](./src/fase2/README.md) 
 
 3. **Monitoramento Contínuo – IoT no Peito do Paciente**  
    Implementação de um wearable médico (ESP32) e coleta de sinais vitais.
@@ -36,7 +38,7 @@ O projeto será desenvolvido em **7 fases**, cada uma com objetivos específicos
 src/
 └── src/
   ├── fase1/documentos_e_projetos_referente_a_fase1/README.md # Documentação detalhada da Fase 1
-  ├── fase2/documentos_e_projetos_referente_a_fase2/README.md # Projeto inicial de modelo preditivo
+  ├── fase2/documentos_e_projetos_referente_a_fase2/README.md # Projeto inicial de modelo preditivo e extras
   └── ...
 ```
 
@@ -59,7 +61,16 @@ Não há informações pessoais identificáveis.
 
 ## 👥 Integrantes
 
-- Gabrielle Barao Halasc Frateschi — RM560147@fiap.com.br
-- Gabriela da Cunha Rocha — RM561041@fiap.com.br
-- Gustavo Segantini Rossignolli — RM560111@fiap.com.br
-- Vitor Lopes Romão — RM559858@fiap.com.br
+Este projeto está sendo desenvolvido pelos alunos da **FIAP** como parte da trilha de **Inteligência Artificial aplicada à Cardiologia**:
+
+- Gabrielle Halasc — RM560147@fiap.com.br
+- Gabriela da Cunha  — RM561041@fiap.com.br
+- Gustavo Segantini  — RM560111@fiap.com.br
+- Vitor Lopes — RM559858@fiap.com.br
+
+## ⚖️ Licença
+
+Este projeto é licenciado sob a **Licença MIT**.  
+Isso significa que seu uso, modificação e distribuição são permitidos, desde que os créditos originais sejam mantidos. 
+ 
+Consulte o arquivo [`LICENSE`](./LICENSE) para mais detalhes.
