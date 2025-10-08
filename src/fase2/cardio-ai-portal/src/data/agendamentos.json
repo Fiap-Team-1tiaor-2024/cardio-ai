@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "pacienteId": 1,
+    "pacienteNome": "Maria Silva",
+    "data": "2024-10-10",
+    "horario": "09:30",
+    "tipo": "Consulta de Rotina",
+    "medico": "Dr. Fernando Cardoso",
+    "status": "Confirmado"
+  },
+  {
+    "id": 2,
+    "pacienteId": 2,
+    "pacienteNome": "João Santos",
+    "data": "2024-10-10",
+    "horario": "10:15",
+    "tipo": "Ecocardiograma",
+    "medico": "Dr. Fernando Cardoso",
+    "status": "Confirmado"
+  },
+  {
+    "id": 3,
+    "pacienteId": 3,
+    "pacienteNome": "Ana Paula Costa",
+    "data": "2024-10-11",
+    "horario": "14:00",
+    "tipo": "Teste Ergométrico",
+    "medico": "Dra. Mariana Alves",
+    "status": "Confirmado"
+  },
+  {
+    "id": 4,
+    "pacienteId": 4,
+    "pacienteNome": "Pedro Oliveira",
+    "data": "2024-10-12",
+    "horario": "08:00",
+    "tipo": "Consulta de Rotina",
+    "medico": "Dr. Fernando Cardoso",
+    "status": "Pendente"
+  },
+  {
+    "id": 5,
+    "pacienteId": 5,
+    "pacienteNome": "Carla Mendes",
+    "data": "2024-10-12",
+    "horario": "11:30",
+    "tipo": "Holter 24h",
+    "medico": "Dra. Mariana Alves",
+    "status": "Confirmado"
+  },
+  {
+    "id": 6,
+    "pacienteId": 6,
+    "pacienteNome": "Roberto Lima",
+    "data": "2024-10-15",
+    "horario": "10:00",
+    "tipo": "Consulta de Retorno",
+    "medico": "Dr. Fernando Cardoso",
+    "status": "Confirmado"
+  }
+]
