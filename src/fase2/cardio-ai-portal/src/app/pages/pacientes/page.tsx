@@ -7,12 +7,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataContext";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Edit, Trash2 } from "lucide-react";
 
 export default function PacientesPage() {
-  const { pacientes } = useData();
+  const { pacientes, deletePaciente } = useData();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
 
   // Filtrar pacientes por nome ou condição
   const pacientesFiltrados = pacientes.filter(p =>
@@ -22,6 +23,23 @@ export default function PacientesPage() {
 
   const handleNovoPaciente = () => {
     router.push("/pages/pacientes/cadastro");
+  };
+
+  const handleEditarPaciente = (id: number) => {
+    router.push(`/pages/pacientes/${id}/editar`);
+  };
+
+  const handleDeleteClick = (id: number) => {
+    setDeleteConfirm(id);
+  };
+
+  const handleConfirmDelete = (id: number) => {
+    deletePaciente(id);
+    setDeleteConfirm(null);
+  };
+
+  const handleCancelDelete = () => {
+    setDeleteConfirm(null);
   };
 
   return (
@@ -63,12 +81,13 @@ export default function PacientesPage() {
                   <TableHead>Telefone</TableHead>
                   <TableHead>Condição</TableHead>
                   <TableHead>Última Consulta</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {pacientesFiltrados.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-gray-500">
+                    <TableCell colSpan={8} className="text-center text-gray-500">
                       Nenhum paciente encontrado
                     </TableCell>
                   </TableRow>
@@ -87,6 +106,48 @@ export default function PacientesPage() {
                       </TableCell>
                       <TableCell>
                         {new Date(paciente.ultimaConsulta).toLocaleDateString('pt-BR')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditarPaciente(paciente.id)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit size={16} className="mr-1" />
+                            Editar
+                          </Button>
+                          {deleteConfirm === paciente.id ? (
+                            <div className="flex gap-1">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleConfirmDelete(paciente.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                Confirmar
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleCancelDelete}
+                              >
+                                Cancelar
+                              </Button>
+                            </div>
+                          ) : (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDeleteClick(paciente.id)}
+                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                            >
+                              <Trash2 size={16} className="mr-1" />
+                              Excluir
+                            </Button>
+                          )}
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

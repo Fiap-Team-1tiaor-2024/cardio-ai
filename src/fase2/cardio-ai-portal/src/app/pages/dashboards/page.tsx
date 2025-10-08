@@ -13,6 +13,7 @@ export default function DashboardsPage() {
     const totalAgendamentos = agendamentos.length;
     const agendamentosConfirmados = agendamentos.filter(a => a.status === "Confirmado").length;
     const agendamentosPendentes = agendamentos.filter(a => a.status === "Pendente").length;
+    const agendamentosCancelados = agendamentos.filter(a => a.status === "Cancelado").length;
     
     // Agrupar pacientes por condição
     const condicoes: Record<string, number> = {};
@@ -44,6 +45,7 @@ export default function DashboardsPage() {
       totalAgendamentos,
       agendamentosConfirmados,
       agendamentosPendentes,
+      agendamentosCancelados,
       condicoes,
       tiposConsulta,
       mediaIdade,
@@ -98,7 +100,38 @@ export default function DashboardsPage() {
         </Card>
       </div>
 
-      {/* Estatísticas adicionais */}
+      {/* Métricas adicionais */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Cancelados</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-red-600">{metricas.agendamentosCancelados}</div>
+            <p className="text-xs text-gray-500 mt-1">Agendamentos cancelados</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Próximos 7 Dias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-blue-600">{metricas.proximosAgendamentos}</div>
+            <p className="text-xs text-gray-500 mt-1">Agendamentos próximos</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Média de Idade</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold">{metricas.mediaIdade}</div>
+            <p className="text-xs text-gray-500 mt-1">Anos dos pacientes</p>
+          </CardContent>
+        </Card>
+      </div>      {/* Estatísticas adicionais */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardHeader>

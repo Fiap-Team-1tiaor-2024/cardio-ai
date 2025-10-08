@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useData } from "@/contexts/DataContext";
+import { Check, X, Trash2 } from "lucide-react";
 
 // Estado do formulário
 type FormState = {
@@ -54,7 +55,7 @@ const initialState: FormState = {
 };
 
 export default function AgendamentosPage() {
-  const { agendamentos, pacientes, addAgendamento, deleteAgendamento } = useData();
+  const { agendamentos, pacientes, addAgendamento, updateAgendamento, deleteAgendamento } = useData();
   const [formState, dispatch] = useReducer(formReducer, initialState);
   const [showForm, setShowForm] = useState(false);
 
@@ -89,8 +90,18 @@ export default function AgendamentosPage() {
     alert("Agendamento criado com sucesso!");
   };
 
-  const handleDelete = (id: number) => {
+  const handleConfirm = (id: number) => {
+    updateAgendamento(id, { status: "Confirmado" });
+  };
+
+  const handleCancel = (id: number) => {
     if (confirm("Deseja realmente cancelar este agendamento?")) {
+      updateAgendamento(id, { status: "Cancelado" });
+    }
+  };
+
+  const handleDelete = (id: number) => {
+    if (confirm("Deseja realmente excluir este agendamento?")) {
       deleteAgendamento(id);
     }
   };
@@ -197,14 +208,14 @@ export default function AgendamentosPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Paciente</TableHead>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Horário</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Médico</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Ações</TableHead>
+                  <TableHead className="text-center">ID</TableHead>
+                  <TableHead className="text-center">Paciente</TableHead>
+                  <TableHead className="text-center">Data</TableHead>
+                  <TableHead className="text-center">Horário</TableHead>
+                  <TableHead className="text-center">Tipo</TableHead>
+                  <TableHead className="text-center">Médico</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-center">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -217,13 +228,13 @@ export default function AgendamentosPage() {
                 ) : (
                   agendamentos.map((agendamento) => (
                     <TableRow key={agendamento.id}>
-                      <TableCell>{agendamento.id}</TableCell>
-                      <TableCell className="font-medium">{agendamento.pacienteNome}</TableCell>
-                      <TableCell>{new Date(agendamento.data).toLocaleDateString('pt-BR')}</TableCell>
-                      <TableCell>{agendamento.horario}</TableCell>
-                      <TableCell>{agendamento.tipo}</TableCell>
-                      <TableCell>{agendamento.medico}</TableCell>
-                      <TableCell>
+                      <TableCell className="text-center">{agendamento.id}</TableCell>
+                      <TableCell className="font-medium text-center">{agendamento.pacienteNome}</TableCell>
+                      <TableCell className="text-center">{new Date(agendamento.data).toLocaleDateString('pt-BR')}</TableCell>
+                      <TableCell className="text-center">{agendamento.horario}</TableCell>
+                      <TableCell className="text-center">{agendamento.tipo}</TableCell>
+                      <TableCell className="text-center">{agendamento.medico}</TableCell>
+                      <TableCell className="text-center">
                         <span
                           className={`px-2 py-1 rounded-full text-sm ${
                             agendamento.status === "Confirmado"
@@ -236,14 +247,46 @@ export default function AgendamentosPage() {
                           {agendamento.status}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDelete(agendamento.id)}
-                        >
-                          Cancelar
-                        </Button>
+                      <TableCell className="text-center">
+                        <div className="flex gap-2 w-[200px] mx-auto justify-center">
+                          <div className="w-[60px]">
+                            {agendamento.status === "Pendente" && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleConfirm(agendamento.id)}
+                                className="text-green-600 hover:text-green-700 hover:bg-green-50 w-full"
+                                title="Confirmar"
+                              >
+                                <Check size={18} />
+                              </Button>
+                            )}
+                          </div>
+                          <div className="w-[60px]">
+                            {agendamento.status !== "Cancelado" && (
+                              <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => handleCancel(agendamento.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full"
+                                title="Cancelar"
+                              >
+                                <X size={18} />
+                              </Button>
+                            )}
+                          </div>
+                          <div className="w-[60px]">
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              onClick={() => handleDelete(agendamento.id)}
+                              className="w-full"
+                              title="Excluir"
+                            >
+                              <Trash2 size={18} />
+                            </Button>
+                          </div>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))

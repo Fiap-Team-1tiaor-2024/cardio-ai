@@ -14,6 +14,7 @@ export default function Sidebar() {
     { href: "/pages/dashboards", icon: Home, label: "Dashboard" },
     { href: "/pages/pacientes", icon: Users, label: "Pacientes" },
     { href: "/pages/agendamentos", icon: Calendar, label: "Agendamentos" },
+    { href: "/pages/calendario", icon: Calendar, label: "Calendário" },
   ];
 
   const isActive = (href: string) => pathname === href;

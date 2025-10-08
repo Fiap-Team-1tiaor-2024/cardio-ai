@@ -1,13 +1,13 @@
-// src/app/pages/pacientes/cadastro/page.tsx
+// src/app/pages/pacientes/[id]/editar/page.tsx
 "use client";
 
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { useData } from "@/contexts/DataContext";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Save, User, Mail, Phone, Calendar, Heart, AlertCircle, CheckCircle } from "lucide-react";
+import { ArrowLeft, Save, User, Mail, Phone, Calendar, Heart, AlertCircle } from "lucide-react";
 
 type FormData = {
   nome: string;
@@ -21,9 +21,13 @@ type FormErrors = {
   [K in keyof FormData]?: string;
 };
 
-export default function CadastroPacientePage() {
+export default function EditarPacientePage() {
   const router = useRouter();
-  const { addPaciente } = useData();
+  const params = useParams();
+  const { pacientes, updatePaciente } = useData();
+  
+  const pacienteId = parseInt(params.id as string);
+  const paciente = pacientes.find(p => p.id === pacienteId);
 
   const [formData, setFormData] = useState<FormData>({
     nome: "",
@@ -36,9 +40,23 @@ export default function CadastroPacientePage() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<{ [K in keyof FormData]?: boolean }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
 
-  // Validações
+  useEffect(() => {
+    if (paciente) {
+      // Converter string de condições separadas por vírgula em array
+      const condicoesArray = paciente.condicao.split(",").map(c => c.trim());
+      
+      setFormData({
+        nome: paciente.nome,
+        idade: paciente.idade.toString(),
+        email: paciente.email,
+        telefone: paciente.telefone,
+        condicoes: condicoesArray,
+      });
+    }
+  }, [paciente]);
+
+  // Validações (mesmas do cadastro)
   const validateNome = (nome: string): string | undefined => {
     if (!nome.trim()) return "Nome é obrigatório";
     if (nome.trim().length < 3) return "Nome deve ter pelo menos 3 caracteres";
@@ -63,7 +81,6 @@ export default function CadastroPacientePage() {
 
   const validateTelefone = (telefone: string): string | undefined => {
     if (!telefone) return "Telefone é obrigatório";
-    // Remove caracteres especiais para validação
     const telefoneLimpo = telefone.replace(/\D/g, "");
     if (telefoneLimpo.length < 10 || telefoneLimpo.length > 11) {
       return "Telefone deve ter 10 ou 11 dígitos";
@@ -76,7 +93,6 @@ export default function CadastroPacientePage() {
     return undefined;
   };
 
-  // Função para validar todos os campos
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {
       nome: validateNome(formData.nome),
@@ -90,7 +106,6 @@ export default function CadastroPacientePage() {
     return !Object.values(newErrors).some(error => error !== undefined);
   };
 
-  // Formatar telefone automaticamente
   const formatTelefone = (value: string): string => {
     const cleaned = value.replace(/\D/g, "");
     if (cleaned.length <= 10) {
@@ -99,11 +114,9 @@ export default function CadastroPacientePage() {
     return cleaned.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
   };
 
-  // Handlers
   const handleChange = (field: keyof FormData, value: string | string[]) => {
     let processedValue = value;
 
-    // Formatação específica por campo
     if (field === "telefone" && typeof value === "string") {
       processedValue = formatTelefone(value);
     } else if (field === "idade" && typeof value === "string") {
@@ -112,7 +125,6 @@ export default function CadastroPacientePage() {
 
     setFormData(prev => ({ ...prev, [field]: processedValue }));
 
-    // Validar campo se já foi tocado
     if (touched[field] && field !== "condicoes") {
       const validators = {
         nome: validateNome,
@@ -162,7 +174,6 @@ export default function CadastroPacientePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Marcar todos os campos como tocados
     setTouched({
       nome: true,
       idade: true,
@@ -178,29 +189,19 @@ export default function CadastroPacientePage() {
     setIsSubmitting(true);
 
     try {
-      // Simular delay de API
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 500));
 
-      const hoje = new Date().toISOString().split("T")[0];
-
-      addPaciente({
+      updatePaciente(pacienteId, {
         nome: formData.nome,
         idade: parseInt(formData.idade),
         email: formData.email,
         telefone: formData.telefone,
         condicao: formData.condicoes.join(", "),
-        dataCadastro: hoje,
-        ultimaConsulta: hoje,
       });
 
-      setShowSuccess(true);
-
-      // Redirecionar após 2 segundos
-      setTimeout(() => {
-        router.push("/pages/pacientes");
-      }, 2000);
+      router.push("/pages/pacientes");
     } catch (error) {
-      console.error("Erro ao cadastrar paciente:", error);
+      console.error("Erro ao atualizar paciente:", error);
     } finally {
       setIsSubmitting(false);
     }
@@ -210,23 +211,16 @@ export default function CadastroPacientePage() {
     router.push("/pages/pacientes");
   };
 
-  if (showSuccess) {
+  if (!paciente) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="min-h-screen flex items-center justify-center">
         <Card className="w-full max-w-md">
-          <CardContent className="pt-6">
-            <div className="text-center space-y-4">
-              <div className="flex justify-center">
-                <div className="bg-green-100 p-4 rounded-full">
-                  <CheckCircle className="text-green-600" size={48} />
-                </div>
-              </div>
-              <h2 className="text-2xl font-bold text-gray-800">Paciente Cadastrado!</h2>
-              <p className="text-gray-600">
-                O paciente <strong>{formData.nome}</strong> foi cadastrado com sucesso.
-              </p>
-              <p className="text-sm text-gray-500">Redirecionando...</p>
-            </div>
+          <CardContent className="pt-6 text-center">
+            <AlertCircle className="mx-auto text-red-500 mb-4" size={48} />
+            <h2 className="text-xl font-bold mb-2">Paciente não encontrado</h2>
+            <Button onClick={() => router.push("/pages/pacientes")}>
+              Voltar para Pacientes
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -247,8 +241,8 @@ export default function CadastroPacientePage() {
             <ArrowLeft size={20} />
           </Button>
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">Novo Paciente</h1>
-            <p className="text-gray-600">Preencha os dados do paciente</p>
+            <h1 className="text-3xl font-bold text-gray-800">Editar Paciente</h1>
+            <p className="text-gray-600">Atualize os dados de {paciente.nome}</p>
           </div>
         </div>
 
@@ -258,7 +252,7 @@ export default function CadastroPacientePage() {
             <CardHeader>
               <CardTitle>Dados do Paciente</CardTitle>
               <CardDescription>
-                Todos os campos são obrigatórios. Preencha com atenção.
+                Todos os campos são obrigatórios. Altere conforme necessário.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -361,9 +355,6 @@ export default function CadastroPacientePage() {
                     <span>{errors.telefone}</span>
                   </div>
                 )}
-                <p className="text-xs text-gray-500">
-                  Formato: (XX) XXXXX-XXXX ou (XX) XXXX-XXXX
-                </p>
               </div>
 
               {/* Condições Cardíacas */}
@@ -434,7 +425,7 @@ export default function CadastroPacientePage() {
                   ) : (
                     <>
                       <Save size={18} className="mr-2" />
-                      Cadastrar Paciente
+                      Salvar Alterações
                     </>
                   )}
                 </Button>
