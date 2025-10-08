@@ -1,0 +1,78 @@
+# GitHub Actions - CI/CD para CardioIA Portal
+# Este workflow constrói e testa a aplicação Docker
+
+name: Docker Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'src/fase2/cardio-ai-portal/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'src/fase2/cardio-ai-portal/**'
+
+env:
+  WORKING_DIR: src/fase2/cardio-ai-portal
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      working-directory: ${{ env.WORKING_DIR }}
+      run: |
+        docker-compose build
+    
+    - name: Start application
+      working-directory: ${{ env.WORKING_DIR }}
+      run: |
+        docker-compose up -d
+        sleep 10
+    
+    - name: Test application health
+      working-directory: ${{ env.WORKING_DIR }}
+      run: |
+        curl -f http://localhost:3000 || exit 1
+    
+    - name: Show logs
+      if: always()
+      working-directory: ${{ env.WORKING_DIR }}
+      run: |
+        docker-compose logs
+    
+    - name: Stop application
+      if: always()
+      working-directory: ${{ env.WORKING_DIR }}
+      run: |
+        docker-compose down
+
+  # Opcional: Build e push para Docker Hub ou GitHub Container Registry
+  # deploy:
+  #   needs: build
+  #   runs-on: ubuntu-latest
+  #   if: github.ref == 'refs/heads/main'
+  #   
+  #   steps:
+  #   - name: Checkout code
+  #     uses: actions/checkout@v4
+  #   
+  #   - name: Login to Docker Hub
+  #     uses: docker/login-action@v3
+  #     with:
+  #       username: ${{ secrets.DOCKER_USERNAME }}
+  #       password: ${{ secrets.DOCKER_PASSWORD }}
+  #   
+  #   - name: Build and push
+  #     working-directory: ${{ env.WORKING_DIR }}
+  #     run: |
+  #       docker build -t yourusername/cardio-ai-portal:latest .
+  #       docker push yourusername/cardio-ai-portal:latest

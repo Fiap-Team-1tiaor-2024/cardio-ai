@@ -80,6 +80,17 @@ cardio-ai-portal/
 │   └── lib/
 │       └── utils.ts                  # Funções utilitárias
 ├── public/                           # Arquivos públicos
+├── Docker/                           # Arquivos Docker
+│   ├── Dockerfile                    # Build produção
+│   ├── Dockerfile.dev                # Build desenvolvimento
+│   ├── docker-compose.yml            # Orquestração produção
+│   ├── docker-compose.dev.yml        # Orquestração desenvolvimento
+│   ├── .dockerignore                 # Arquivos ignorados
+│   ├── docker.ps1                    # Helper PowerShell
+│   ├── Makefile                      # Helper Make
+│   └── healthcheck.sh                # Script de saúde
+├── Documentação/
+│   └── DOCKER.md                     # Documentação Docker completa
 ├── package.json
 ├── tsconfig.json
 └── tailwind.config.js
@@ -88,10 +99,56 @@ cardio-ai-portal/
 ## 🔧 Instalação e Execução
 
 ### Pré-requisitos
-- Node.js 18+ instalado
-- npm ou yarn
+- Node.js 18+ instalado (para execução local)
+- npm ou yarn (para execução local)
+- Docker e Docker Compose (para execução em container)
 
-### Passos
+### Opção 1: Execução com Docker (Recomendado) 🐳
+
+#### Modo Produção
+```bash
+# 1. Navegue até o diretório do projeto
+cd cardio-ai/src/fase2/cardio-ai-portal
+
+# 2. Construir e executar
+docker-compose up
+
+# Ou em background
+docker-compose up -d
+
+# 3. Acesse a aplicação
+# http://localhost:3000
+```
+
+#### Modo Desenvolvimento (com hot-reload)
+```bash
+# Executar em modo desenvolvimento
+docker-compose -f docker-compose.dev.yml up
+
+# Ou em background
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+#### Comandos úteis do Docker
+```bash
+# Ver logs
+docker-compose logs -f
+
+# Parar containers
+docker-compose down
+
+# Reconstruir após mudanças
+docker-compose up --build
+
+# Limpar tudo
+docker-compose down -v --rmi all
+```
+
+📖 **Para mais detalhes sobre Docker, consulte [DOCKER.md](./DOCKER.md)**
+
+### Opção 2: Execução Local (Sem Docker)
+
+#### Passos
 
 1. **Clone o repositório**
 ```bash
@@ -184,6 +241,31 @@ O projeto utiliza dados simulados armazenados em arquivos JSON:
 - Não há integração com back-end real
 - A autenticação é simulada apenas para demonstração de conceitos
 - Os dados são armazenados apenas na memória do navegador
+
+## 🐳 Docker
+
+Esta aplicação está configurada para rodar em Docker! Veja os guias:
+
+- **[DOCKER.md](./DOCKER.md)** - Documentação completa
+
+### Início Rápido Docker
+
+```bash
+# Opção 1: PowerShell (Windows)
+.\docker.ps1 up
+
+# Opção 2: Docker Compose
+docker-compose up
+
+# Opção 3: NPM
+npm run docker:up
+```
+
+Acesse: http://localhost:3000
+
+## 📚 Documentação Adicional
+
+- [DOCKER.md](./DOCKER.md) - Documentação Docker
 
 ## 👥 Contribuidores
 

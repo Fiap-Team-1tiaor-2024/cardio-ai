@@ -1,0 +1,54 @@
+# Docker Compose - Projeto Completo CardioIA
+# Este arquivo pode ser usado para rodar todas as partes do projeto juntas
+
+services:
+  # Portal Web (Frontend Next.js)
+  cardio-ai-portal:
+    build:
+      context: ./cardio-ai-portal
+      dockerfile: Dockerfile
+    container_name: cardio-ai-portal
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    restart: unless-stopped
+    networks:
+      - cardio-network
+
+  # Adicione outros serviços aqui conforme necessário
+  # Exemplo: Backend API, Banco de dados, etc.
+  
+  # cardio-ai-api:
+  #   build:
+  #     context: ./cardio-ai-ml
+  #     dockerfile: Dockerfile
+  #   container_name: cardio-ai-api
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - PYTHONUNBUFFERED=1
+  #   networks:
+  #     - cardio-network
+  #   depends_on:
+  #     - database
+  
+  # database:
+  #   image: postgres:15-alpine
+  #   container_name: cardio-ai-db
+  #   environment:
+  #     - POSTGRES_DB=cardio_ai
+  #     - POSTGRES_USER=cardio
+  #     - POSTGRES_PASSWORD=cardio123
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+  #   networks:
+  #     - cardio-network
+
+networks:
+  cardio-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
