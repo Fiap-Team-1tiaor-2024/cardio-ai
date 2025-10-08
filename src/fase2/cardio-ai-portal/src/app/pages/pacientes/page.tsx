@@ -1,13 +1,17 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataContext";
+import { Plus, Search } from "lucide-react";
 
 export default function PacientesPage() {
   const { pacientes } = useData();
+  const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
 
   // Filtrar pacientes por nome ou condição
@@ -16,21 +20,37 @@ export default function PacientesPage() {
     p.condicao.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const handleNovoPaciente = () => {
+    router.push("/pages/pacientes/cadastro");
+  };
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Pacientes Cadastrados</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Pacientes Cadastrados</CardTitle>
+            <Button
+              onClick={handleNovoPaciente}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus size={18} className="mr-2" />
+              Novo Paciente
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="mb-4">
-            <Input
-              type="text"
-              placeholder="Buscar por nome ou condição..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-md"
-            />
+            <div className="relative max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+              <Input
+                type="text"
+                placeholder="Buscar por nome ou condição..."
+                value={searchTerm}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
           <div className="overflow-x-auto">
             <Table>

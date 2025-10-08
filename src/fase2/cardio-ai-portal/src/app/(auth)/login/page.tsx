@@ -30,7 +30,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
       router.replace("/pages/dashboards");
-    } catch (err) {
+    } catch {
       setError("Erro ao autenticar");
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
                   value={email}
-                  onChange={(e: any) => setEmail(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                   type="email"
                   placeholder="seu@email.com"
                   className="pl-10"
@@ -83,7 +83,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
                   value={password}
-                  onChange={(e: any) => setPassword(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                   type="password"
                   placeholder="••••••••"
                   className="pl-10"

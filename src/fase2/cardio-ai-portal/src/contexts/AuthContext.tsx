@@ -39,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setLoading(false);
   }, []);
 
-  async function login(email: string, password: string) {
+  async function login(email: string, _password: string) {
     setLoading(true);
     // Simula validação: qualquer email/senha => token fake
     const fakeToken = "fake-jwt-token-" + Math.random().toString(36).slice(2);

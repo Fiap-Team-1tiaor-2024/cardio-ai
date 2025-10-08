@@ -30,6 +30,9 @@ export type Agendamento = {
 type DataContextType = {
   pacientes: Paciente[];
   agendamentos: Agendamento[];
+  addPaciente: (paciente: Omit<Paciente, "id">) => void;
+  updatePaciente: (id: number, paciente: Partial<Paciente>) => void;
+  deletePaciente: (id: number) => void;
   addAgendamento: (agendamento: Omit<Agendamento, "id">) => void;
   updateAgendamento: (id: number, agendamento: Partial<Agendamento>) => void;
   deleteAgendamento: (id: number) => void;
@@ -46,6 +49,24 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     setPacientes(pacientesData as Paciente[]);
     setAgendamentos(agendamentosData as Agendamento[]);
   }, []);
+
+  const addPaciente = (paciente: Omit<Paciente, "id">) => {
+    const newId = pacientes.length > 0 
+      ? Math.max(...pacientes.map(p => p.id)) + 1 
+      : 1;
+    const newPaciente = { ...paciente, id: newId };
+    setPacientes([...pacientes, newPaciente]);
+  };
+
+  const updatePaciente = (id: number, updates: Partial<Paciente>) => {
+    setPacientes(pacientes.map(p => 
+      p.id === id ? { ...p, ...updates } : p
+    ));
+  };
+
+  const deletePaciente = (id: number) => {
+    setPacientes(pacientes.filter(p => p.id !== id));
+  };
 
   const addAgendamento = (agendamento: Omit<Agendamento, "id">) => {
     const newId = agendamentos.length > 0 
@@ -68,8 +89,11 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   return (
     <DataContext.Provider 
       value={{ 
-        pacientes, 
-        agendamentos, 
+        pacientes,
+        agendamentos,
+        addPaciente,
+        updatePaciente,
+        deletePaciente,
         addAgendamento,
         updateAgendamento,
         deleteAgendamento
