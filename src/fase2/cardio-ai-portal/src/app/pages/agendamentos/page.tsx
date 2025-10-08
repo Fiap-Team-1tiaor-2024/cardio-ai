@@ -7,6 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useData } from "@/contexts/DataContext";
 import { Check, X, Trash2 } from "lucide-react";
+import { showSuccess, showError } from "@/lib/toast";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useConfirmModal } from "@/hooks/useConfirmModal";
 
 // Estado do formulário
 type FormState = {
@@ -58,20 +61,21 @@ export default function AgendamentosPage() {
   const { agendamentos, pacientes, addAgendamento, updateAgendamento, deleteAgendamento } = useData();
   const [formState, dispatch] = useReducer(formReducer, initialState);
   const [showForm, setShowForm] = useState(false);
+  const confirmModal = useConfirmModal();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validações simples
     if (!formState.pacienteId || !formState.data || !formState.horario || !formState.tipo || !formState.medico) {
-      alert("Por favor, preencha todos os campos obrigatórios!");
+      showError("Por favor, preencha todos os campos obrigatórios!");
       return;
     }
 
     // Buscar nome do paciente
     const paciente = pacientes.find(p => p.id === parseInt(formState.pacienteId));
     if (!paciente) {
-      alert("Paciente não encontrado!");
+      showError("Paciente não encontrado!");
       return;
     }
 
@@ -87,23 +91,32 @@ export default function AgendamentosPage() {
 
     dispatch({ type: "RESET" });
     setShowForm(false);
-    alert("Agendamento criado com sucesso!");
+    showSuccess("Agendamento criado com sucesso!");
   };
 
   const handleConfirm = (id: number) => {
     updateAgendamento(id, { status: "Confirmado" });
+    showSuccess("Agendamento confirmado!");
   };
 
   const handleCancel = (id: number) => {
-    if (confirm("Deseja realmente cancelar este agendamento?")) {
-      updateAgendamento(id, { status: "Cancelado" });
-    }
+    confirmModal.showConfirm({
+      message: "Deseja realmente cancelar este agendamento?",
+      onConfirm: () => {
+        updateAgendamento(id, { status: "Cancelado" });
+        showSuccess("Agendamento cancelado!");
+      }
+    });
   };
 
   const handleDelete = (id: number) => {
-    if (confirm("Deseja realmente excluir este agendamento?")) {
-      deleteAgendamento(id);
-    }
+    confirmModal.showConfirm({
+      message: "Deseja realmente excluir este agendamento?",
+      onConfirm: () => {
+        deleteAgendamento(id);
+        showSuccess("Agendamento excluído!");
+      }
+    });
   };
 
   return (
@@ -299,6 +312,15 @@ export default function AgendamentosPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Confirmação */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        message={confirmModal.message}
+        title={confirmModal.title}
+        onConfirm={confirmModal.handleConfirm}
+        onCancel={confirmModal.handleCancel}
+      />
     </div>
   );
 }

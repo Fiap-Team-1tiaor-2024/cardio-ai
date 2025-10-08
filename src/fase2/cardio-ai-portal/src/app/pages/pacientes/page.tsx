@@ -8,12 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useData } from "@/contexts/DataContext";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { showSuccess } from "@/lib/toast";
+import ConfirmModal from "@/components/ConfirmModal";
+import { useConfirmModal } from "@/hooks/useConfirmModal";
 
 export default function PacientesPage() {
   const { pacientes, deletePaciente } = useData();
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
-  const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const confirmModal = useConfirmModal();
 
   // Filtrar pacientes por nome ou condição
   const pacientesFiltrados = pacientes.filter(p =>
@@ -30,16 +33,14 @@ export default function PacientesPage() {
   };
 
   const handleDeleteClick = (id: number) => {
-    setDeleteConfirm(id);
-  };
-
-  const handleConfirmDelete = (id: number) => {
-    deletePaciente(id);
-    setDeleteConfirm(null);
-  };
-
-  const handleCancelDelete = () => {
-    setDeleteConfirm(null);
+    const paciente = pacientes.find(p => p.id === id);
+    confirmModal.showConfirm({
+      message: `Tem certeza que deseja excluir o paciente "${paciente?.nome}"?`,
+      onConfirm: () => {
+        deletePaciente(id);
+        showSuccess('Paciente excluído com sucesso!');
+      }
+    });
   };
 
   return (
@@ -118,35 +119,15 @@ export default function PacientesPage() {
                             <Edit size={16} className="mr-1" />
                             Editar
                           </Button>
-                          {deleteConfirm === paciente.id ? (
-                            <div className="flex gap-1">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleConfirmDelete(paciente.id)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                Confirmar
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={handleCancelDelete}
-                              >
-                                Cancelar
-                              </Button>
-                            </div>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteClick(paciente.id)}
-                              className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                            >
-                              <Trash2 size={16} className="mr-1" />
-                              Excluir
-                            </Button>
-                          )}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteClick(paciente.id)}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          >
+                            <Trash2 size={16} className="mr-1" />
+                            Excluir
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -160,6 +141,15 @@ export default function PacientesPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modal de Confirmação */}
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        message={confirmModal.message}
+        title={confirmModal.title}
+        onConfirm={confirmModal.handleConfirm}
+        onCancel={confirmModal.handleCancel}
+      />
     </div>
   );
 }
