@@ -6,6 +6,12 @@ Aqui, o foco está na **automação do diagnóstico clínico** e na **implantaç
 
 ---
 
+## 🎥 Vídeos de Demonstração 
+
+Vídeo Demonstrativo do **Front-End** - [Link 🔗](https://www.youtube.com/watch?v=8lajZiSa9jg)
+
+Vídeo Demonstrativo dos **Modelos Preditivos** - [Link 🔗](https://youtu.be/JfGpiabBjkY)
+
 ## 🧠 Visão Geral  
 
 A Fase 2 é composta por três módulos principais:
