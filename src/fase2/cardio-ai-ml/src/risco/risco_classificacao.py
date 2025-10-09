@@ -1,8 +1,12 @@
 import pandas as pd
 import os
 
+# Diretório atual (onde este arquivo .py está)
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DADOS_DIR = os.path.join(BASE_DIR, "dados")
+
+# Caminho da pasta de dados (um nível acima de /riscos → /dados)
+DADOS_DIR = os.path.join(BASE_DIR, "..", "dados")
+os.makedirs(DADOS_DIR, exist_ok=True)  # garante que a pasta exista
 
 # Base simulada ampliada com sinônimos e variações
 dados = [
@@ -59,7 +63,7 @@ dados = [
     ["cansaço moderado após exercícios leves", "baixo risco"],
     ["leve dor de cabeça e cansaço", "baixo risco"],
     ["me sinto cansado, mas nada grave", "baixo risco"],
-    # VARIAÇÕES ADICIONAIS (mistura de expressões)
+    # VARIAÇÕES ADICIONAIS
     ["sinto aperto no peito e mal consigo respirar", "alto risco"],
     ["batimentos cardíacos acelerados e tontura", "alto risco"],
     ["dor no peito e suor frio repentino", "alto risco"],
@@ -87,6 +91,7 @@ dados = [
 # Criar DataFrame e salvar
 df = pd.DataFrame(dados, columns=["frase", "situacao"])
 
-df.to_csv(os.path.join(BASE_DIR, "../dados/frases_risco_expandido.csv"), index=False, encoding="utf-8-sig")
+csv_path = os.path.join(DADOS_DIR, "frases_risco_expandido.csv")
+df.to_csv(csv_path, index=False, encoding="utf-8-sig")
 
-print("Arquivo frases_risco_expandido.csv criado com sucesso!")
+print(f"✅ Arquivo criado com sucesso em:\n{csv_path}")
