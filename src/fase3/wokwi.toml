@@ -2,3 +2,5 @@
 version = 1
 elf = ".pio/build/esp32dev/firmware.elf"
 firmware = ".pio/build/esp32dev/firmware.bin"
+# Configuração de partições personalizadas para SPIFFS
+partitions = ".pio/build/esp32dev/partitions.bin"

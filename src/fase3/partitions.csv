@@ -1,7 +1,7 @@
-# Name,   Type, SubType,  Offset,   Size,     Flags
-nvs,       data, nvs,      0x9000,   0x5000,
-phy_init,  data, phy,      0xf000,   0x1000,
-# Aplicativo único (sem OTA) de ~1.5MB
-factory,   app,  factory,  0x10000,  0x180000,
-# Partição de arquivos (usando LittleFS na camada Arduino) ocupando o restante (~2.4MB)
-spiffs,    data, spiffs,   ,         0x270000,
+# Wokwi Custom Partition Table
+# Name,   Type, SubType, Offset,  Size
+nvs,      data, nvs,     0x9000,  0x5000
+otadata,  data, ota,     0xe000,  0x2000
+app0,     app,  ota_0,   0x10000, 0x140000
+app1,     app,  ota_1,   0x150000, 0x140000
+spiffs,   data, spiffs,  0x290000, 0x170000

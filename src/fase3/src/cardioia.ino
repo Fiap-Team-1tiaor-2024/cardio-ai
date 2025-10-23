@@ -11,7 +11,7 @@
  * Sensores Utilizados:
  *   1. DHT22 - Temperatura e Umidade (obrigatório)
  *   2. Potenciômetro - Simulador de BPM/Frequência Cardíaca
- *   3. MPU6050 - Acelerômetro/Giroscópio (detecção de movimento)
+ *   3. Simulação de movimento via código (detecção de atividade)
  * 
  * Plataforma: ESP32 DevKit V1
  * Sistema de Arquivos: LittleFS (Edge Storage)
@@ -37,15 +37,9 @@
 
 // --- Bibliotecas de Sensores e Armazenamento ---
 #include <FS.h>
-#include <SPIFFS.h>
+#include <LittleFS.h>  // Sistema de arquivos moderno
 #include <ArduinoJson.h>
 #include "DHT.h"
-#include <Wire.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_Sensor.h>
-
-// Define para compatibilidade (usar SPIFFS ao invés de LittleFS)
-#define LittleFS SPIFFS
 
 // ====================================================================
 // CONFIGURAÇÕES - PREENCHA COM SEUS DADOS!
@@ -78,9 +72,6 @@ DHT dht(DHT_PIN, DHT_TYPE);
 // --- Potenciômetro (Simulador de BPM) ---
 #define BPM_PIN 34  // Pino analógico ADC1
 
-// --- MPU6050 (Acelerômetro/Giroscópio) ---
-Adafruit_MPU6050 mpu;
-
 // --- LED de Status ---
 #define STATUS_LED 2  // LED interno do ESP32
 
@@ -92,10 +83,16 @@ const char* DATA_FILE = "/sensor_data.log";
 const char* METADATA_FILE = "/metadata.json";
 
 // --- Estratégia de Resiliência ---
-const int MAX_SAMPLES = 1000;           // Máximo de 1000 amostras no buffer
-const int READ_INTERVAL = 500;         // Leitura a cada 5 segundos (5s)
+const int MAX_SAMPLES = 100;            // Máximo de 100 amostras no buffer RAM (para Wokwi)
+const int READ_INTERVAL = 5000;         // Leitura a cada 5 segundos
 const int SYNC_INTERVAL = 10000;        // Tentativa de sync a cada 10s
 const size_t MAX_STORAGE_BYTES = 51200; // 50KB (~1000 amostras JSON)
+
+// --- Buffer em RAM (alternativa ao filesystem) ---
+String dataBuffer[100];                 // Buffer circular em RAM
+int bufferWriteIndex = 0;               // Índice de escrita
+int bufferReadIndex = 0;                // Índice de leitura
+int bufferCount = 0;                    // Quantidade de itens no buffer
 
 // --- Contadores e Flags ---
 unsigned long lastReadTime = 0;
@@ -106,7 +103,7 @@ int totalSamplesCollected = 0;
 int totalSamplesSent = 0;
 bool wifiConnected = false;
 bool mqttConnected = false;
-bool spiffsReady = false;  // Flag para indicar se SPIFFS está disponível
+bool storageReady = false;  // Flag para indicar se LittleFS está disponível
 
 // ====================================================================
 // LIMIARES DE ALERTA (Valores Críticos)
@@ -363,54 +360,19 @@ void updateStatusLED() {
 // ====================================================================
 
 /**
- * @brief Salva metadados do sistema (contadores, estatísticas)
+ * @brief Salva metadados (desabilitado - usando apenas RAM)
  */
 void updateMetadata() {
-  if (!spiffsReady) return; // Não salva se SPIFFS não está disponível
-  
-  JsonDocument meta;
-  
-  meta["sample_count"] = sampleCount;
-  meta["total_collected"] = totalSamplesCollected;
-  meta["total_sent"] = totalSamplesSent;
-  meta["last_update"] = millis();
-  
-  File file = SPIFFS.open(METADATA_FILE, FILE_WRITE);
-  if (file) {
-    serializeJson(meta, file);
-    file.close();
-  }
+  // Não salva metadados em filesystem (usando apenas RAM)
+  return;
 }
 
 /**
- * @brief Carrega metadados do sistema
+ * @brief Carrega metadados (desabilitado - usando apenas RAM)
  */
 void loadMetadata() {
-  if (!spiffsReady) {
-    Serial.println("📋 SPIFFS não disponível. Iniciando sem metadados.");
-    return;
-  }
-  
-  File file = SPIFFS.open(METADATA_FILE, FILE_READ);
-  if (!file) {
-    Serial.println("📋 Nenhum metadado anterior encontrado. Iniciando do zero.");
-    return;
-  }
-  
-  JsonDocument meta;
-  DeserializationError error = deserializeJson(meta, file);
-  file.close();
-  
-  if (!error) {
-    sampleCount = meta["sample_count"] | 0;
-    totalSamplesCollected = meta["total_collected"] | 0;
-    totalSamplesSent = meta["total_sent"] | 0;
-    
-    Serial.println("📋 Metadados carregados:");
-    Serial.printf("   Amostras pendentes: %d\n", sampleCount);
-    Serial.printf("   Total coletado: %d\n", totalSamplesCollected);
-    Serial.printf("   Total enviado: %d\n", totalSamplesSent);
-  }
+  Serial.println("📋 Sistema usando buffer RAM (sem persistência)");
+  Serial.println("   Metadados não serão carregados de arquivo");
 }
 
 // ====================================================================
@@ -447,15 +409,15 @@ void printSystemStatus() {
                 mqttConnected ? "CONECTADO" : "OFFLINE");
   
   // Armazenamento
-  if (spiffsReady) {
-    size_t usedBytes = SPIFFS.usedBytes();
-    size_t totalBytes = SPIFFS.totalBytes();
-    float usagePercent = (usedBytes * 100.0) / totalBytes;
+  if (storageReady) {
+    size_t usedBytes = bufferCount * 512; // Estimativa: 512 bytes por amostra
+    size_t totalBytes = MAX_SAMPLES * 512;
+    float usagePercent = (bufferCount * 100.0) / MAX_SAMPLES;
     
-    Serial.printf("║ 💾 Armazenamento: %d/%d bytes (%.1f%%)                         ║\n",
-                  usedBytes, totalBytes, usagePercent);
+    Serial.printf("║ 💾 Buffer RAM: %d/%d amostras (%.1f%%)                         ║\n",
+                  bufferCount, MAX_SAMPLES, usagePercent);
   } else {
-    Serial.println("║ 💾 Armazenamento: INDISPONÍVEL (SPIFFS não montado)            ║");
+    Serial.println("║ 💾 Armazenamento: INDISPONÍVEL                                  ║");
   }
   
   // Amostras
@@ -477,41 +439,26 @@ void printSystemStatus() {
 // ====================================================================
 
 /**
- * @brief Inicializa o sistema de arquivos SPIFFS (compatível com Wokwi)
+ * @brief Inicializa o sistema de armazenamento (RAM buffer para Wokwi)
  */
 void setup_storage() {
-  Serial.println("🔧 Inicializando sistema de arquivos (SPIFFS)...");
+  Serial.println("🔧 Inicializando sistema de armazenamento...");
+  Serial.println("   Modo: BUFFER RAM (100 amostras)");
+  Serial.println("   ⚠️  LittleFS desabilitado para compatibilidade Wokwi");
   
-  // Tenta montar o SPIFFS (formatFormatIfFailed = true)
-  if (!SPIFFS.begin(true)) {
-    Serial.println("⚠️  Primeira tentativa falhou. Tentando formatar...");
-    
-    // Se falhar, tenta formatar explicitamente
-    if (SPIFFS.format()) {
-      Serial.println("✅ SPIFFS formatado!");
-      
-      // Tenta montar novamente após formatar
-      if (!SPIFFS.begin(false)) {
-        Serial.println("❌ ERRO: Falha ao montar o SPIFFS mesmo após formatação!");
-        Serial.println("   Verifique a configuração de partições.");
-        Serial.println("   Continuando sem armazenamento local...");
-        return; // Continua sem SPIFFS
-      }
-    } else {
-      Serial.println("❌ ERRO: Não foi possível formatar o SPIFFS!");
-      Serial.println("   Continuando sem armazenamento local...");
-      return; // Continua sem SPIFFS
-    }
+  // Inicializa buffer em RAM
+  for (int i = 0; i < MAX_SAMPLES; i++) {
+    dataBuffer[i] = "";
   }
+  bufferWriteIndex = 0;
+  bufferReadIndex = 0;
+  bufferCount = 0;
   
-  Serial.println("✅ SPIFFS montado com sucesso!");
-  spiffsReady = true;  // Marca SPIFFS como disponível
+  storageReady = true; // Marca como pronto (usando RAM)
   
-  // Mostra informações do sistema de arquivos
-  size_t totalBytes = SPIFFS.totalBytes();
-  size_t usedBytes = SPIFFS.usedBytes();
-  Serial.printf("   Total: %d bytes | Usado: %d bytes | Livre: %d bytes\n", 
-                totalBytes, usedBytes, totalBytes - usedBytes);
+  Serial.println("   ✅ Buffer RAM inicializado!");
+  Serial.printf("   Capacidade: %d amostras\n", MAX_SAMPLES);
+  Serial.printf("   Memória estimada: ~%d KB\n", (MAX_SAMPLES * 512) / 1024);
 }
 
 /**
@@ -527,18 +474,6 @@ void setup_sensors() {
   // Potenciômetro BPM
   pinMode(BPM_PIN, INPUT);
   Serial.println("   ✅ Potenciômetro BPM configurado");
-  
-  // MPU6050 - DESABILITADO NO WOKWI (causa erros I2C)
-  Serial.println("   ⚠️  MPU6050 desabilitado (não suportado no Wokwi)");
-  // Wire.begin();
-  // if (mpu.begin()) {
-  //   Serial.println("   ✅ MPU6050 (Acelerômetro) conectado");
-  //   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
-  //   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
-  //   mpu.setFilterBandwidth(MPU6050_BAND_21_HZ);
-  // } else {
-  //   Serial.println("   ⚠️  MPU6050 não detectado (opcional)");
-  // }
   
   Serial.println("✅ Sensores inicializados!\n");
 }
@@ -678,26 +613,22 @@ int readBPM() {
 }
 
 /**
- * @brief Simula movimento/aceleração (MPU6050 desabilitado no Wokwi)
+ * @brief Simula movimento/atividade física
+ *        Gera valores aleatórios para simular níveis de atividade
  */
 float readMovement() {
-  // MPU6050 causa erros I2C no Wokwi, então retornamos valor simulado
-  // Simula repouso com pequenas variações aleatórias
-  float baseMovement = 0.05; // Repouso (baixo)
-  float variation = (random(0, 20) - 10) / 100.0; // -0.1 a +0.1
+  // Simulação de movimento baseada em valores aleatórios
+  // Valores típicos:
+  // - 0.0 - 0.5g: Repouso/Sedentário
+  // - 0.5 - 1.5g: Atividade leve (caminhada)
+  // - 1.5 - 3.0g: Atividade moderada (corrida leve)
+  // - > 3.0g: Atividade intensa
   
-  return baseMovement + variation;
+  float baseMovement = 0.1; // Repouso base
+  float variation = (random(0, 100) - 50) / 100.0; // -0.5 a +0.5
+  float activitySpike = (random(0, 100) < 10) ? random(50, 200) / 100.0 : 0; // 10% chance de pico
   
-  // CÓDIGO ORIGINAL COMENTADO (para uso em ESP32 físico):
-  // sensors_event_t a, g, temp;
-  // if (!mpu.getEvent(&a, &g, &temp)) {
-  //   return 0.05;
-  // }
-  // float axG = a.acceleration.x / 9.81;
-  // float ayG = a.acceleration.y / 9.81;
-  // float azG = a.acceleration.z / 9.81;
-  // float magnitude = sqrt(axG*axG + ayG*ayG + (azG-1)*(azG-1));
-  // return magnitude;
+  return max(0.0f, baseMovement + variation + activitySpike);
 }
 
 /**
@@ -737,7 +668,7 @@ void handleSensorReadings() {
   JsonObject status = doc["status"].to<JsonObject>();
   status["wifi"] = wifiConnected;
   status["mqtt"] = mqttConnected;
-  status["storage_used"] = spiffsReady ? SPIFFS.usedBytes() : 0;
+  status["storage_used"] = storageReady ? (bufferCount * 512) : 0;
   status["samples_pending"] = sampleCount;
   status["uptime"] = (millis() - systemStartTime) / 1000;
   status["status"] = "online";
@@ -802,103 +733,69 @@ void handleSensorReadings() {
 // ====================================================================
 
 /**
- * @brief Salva dados no SPIFFS com controle de limite
- *        Implementa buffer circular de 1000 amostras
+ * @brief Salva dados no buffer RAM (Edge Computing sem filesystem)
  */
 void saveDataToFile(JsonDocument& doc) {
-  // Verifica se SPIFFS está disponível
-  if (!spiffsReady) {
-    return; // Não tenta salvar se SPIFFS não está montado
-  }
+  if (!storageReady) return;
   
-  // Verifica se já atingiu o limite de amostras
-  if (sampleCount >= MAX_SAMPLES) {
-    Serial.println("⚠️  BUFFER CHEIO! Descartando amostra mais antiga...");
-    
-    // Estratégia: Remove as primeiras 100 amostras para liberar espaço
-    File fileOld = SPIFFS.open(DATA_FILE, FILE_READ);
-    File fileNew = SPIFFS.open("/temp.log", FILE_WRITE);
-    
-    if (fileOld && fileNew) {
-      int linesToSkip = 100;
-      int currentLine = 0;
-      
-      while (fileOld.available()) {
-        String line = fileOld.readStringUntil('\n');
-        currentLine++;
-        if (currentLine > linesToSkip) {
-          fileNew.println(line);
-        }
-      }
-      
-      fileOld.close();
-      fileNew.close();
-      
-      SPIFFS.remove(DATA_FILE);
-      SPIFFS.rename("/temp.log", DATA_FILE);
-      
-      sampleCount -= linesToSkip;
-      Serial.printf("   ♻️  Buffer otimizado. Amostras: %d\n", sampleCount);
-    }
-  }
-
-  // Abre arquivo para adicionar dados
-  File file = SPIFFS.open(DATA_FILE, FILE_APPEND);
-  if (!file) {
-    Serial.println("❌ Erro ao abrir arquivo para escrita!");
-    return;
-  }
-  
-  // Serializa JSON e salva
+  // Serializa JSON para string
   String jsonString;
   serializeJson(doc, jsonString);
-  file.println(jsonString);
-  file.close();
   
-  sampleCount++;
+  // Verifica se buffer está cheio
+  if (bufferCount >= MAX_SAMPLES) {
+    Serial.println("⚠️  BUFFER RAM CHEIO! Descartando amostra mais antiga...");
+    // Remove a mais antiga (circular buffer)
+    bufferReadIndex = (bufferReadIndex + 1) % MAX_SAMPLES;
+    bufferCount--;
+  }
+  
+  // Adiciona no buffer
+  dataBuffer[bufferWriteIndex] = jsonString;
+  bufferWriteIndex = (bufferWriteIndex + 1) % MAX_SAMPLES;
+  bufferCount++;
+  sampleCount = bufferCount;
   totalSamplesCollected++;
   
-  Serial.printf("   💾 Salvo localmente. Total no buffer: %d/%d\n", 
-                sampleCount, MAX_SAMPLES);
-  
-  updateMetadata();
+  Serial.printf("   💾 Salvo em RAM. Buffer: %d/%d\n", bufferCount, MAX_SAMPLES);
 }
 
 /**
- * @brief Sincroniza dados locais com a nuvem via MQTT
- *        Chamado periodicamente quando há conexão
+ * @brief Sincroniza dados do buffer RAM com a nuvem via MQTT
  */
 void handleDataSync() {
-  // Só sincroniza se SPIFFS estiver disponível, MQTT conectado e houver dados
-  if (!spiffsReady || !mqttConnected || sampleCount == 0) {
-    return;
-  }
-
-  File file = SPIFFS.open(DATA_FILE, FILE_READ);
-  
-  if (!file || file.size() == 0) {
-    if (file) file.close();
+  if (!storageReady || !mqttConnected || bufferCount == 0) {
     return;
   }
 
   Serial.println("\n🔄 ========== SINCRONIZAÇÃO COM NUVEM ==========");
-  Serial.printf("   Amostras pendentes: %d\n", sampleCount);
+  Serial.printf("   Amostras pendentes: %d\n", bufferCount);
   
   int sent = 0;
   int failed = 0;
+  int maxToSend = min(bufferCount, 50); // Limita a 50 por vez
   
-  // Lê e envia linha por linha
-  while (file.available() && sent < 50) { // Limita a 50 por vez
-    String line = file.readStringUntil('\n');
-    line.trim();
+  // Envia amostras do buffer
+  for (int i = 0; i < maxToSend; i++) {
+    String jsonString = dataBuffer[bufferReadIndex];
     
-    if (line.length() == 0) continue;
-
+    if (jsonString.length() == 0) {
+      bufferReadIndex = (bufferReadIndex + 1) % MAX_SAMPLES;
+      continue;
+    }
+    
     // Publica no MQTT
-    if (mqttClient.publish(MQTT_TOPIC_DATA, line.c_str(), false)) {
+    if (mqttClient.publish(MQTT_TOPIC_DATA, jsonString.c_str(), false)) {
       sent++;
       totalSamplesSent++;
-      Serial.printf("   ✅ Enviado %d/%d\n", sent, sampleCount);
+      Serial.printf("   ✅ Enviado %d/%d\n", sent, bufferCount);
+      
+      // Limpa da RAM
+      dataBuffer[bufferReadIndex] = "";
+      bufferReadIndex = (bufferReadIndex + 1) % MAX_SAMPLES;
+      bufferCount--;
+      sampleCount = bufferCount;
+      
       delay(100); // Evita sobrecarga
     } else {
       failed++;
@@ -907,38 +804,11 @@ void handleDataSync() {
     }
   }
   
-  file.close();
-  
-  // Se enviou todas as amostras, limpa o arquivo
-  if (sent > 0 && failed == 0 && !file.available()) {
-    SPIFFS.remove(DATA_FILE);
-    sampleCount = 0;
-    Serial.println("   🎉 SINCRONIZAÇÃO COMPLETA! Buffer limpo.");
-    updateMetadata();
-  } else if (sent > 0) {
-    // Remove apenas as linhas enviadas
-    File fileOld = SPIFFS.open(DATA_FILE, FILE_READ);
-    File fileNew = SPIFFS.open("/temp.log", FILE_WRITE);
-    
-    if (fileOld && fileNew) {
-      int skipped = 0;
-      while (fileOld.available()) {
-        String line = fileOld.readStringUntil('\n');
-        if (skipped < sent) {
-          skipped++;
-        } else {
-          fileNew.println(line);
-        }
-      }
-      fileOld.close();
-      fileNew.close();
-      
-      SPIFFS.remove(DATA_FILE);
-      SPIFFS.rename("/temp.log", DATA_FILE);
-      
-      sampleCount -= sent;
-      Serial.printf("   ⏳ Sincronização parcial. Restam %d amostras.\n", sampleCount);
-      updateMetadata();
+  if (sent > 0) {
+    if (bufferCount == 0) {
+      Serial.println("   🎉 SINCRONIZAÇÃO COMPLETA! Buffer limpo.");
+    } else {
+      Serial.printf("   ⏳ Sincronização parcial. Restam %d amostras.\n", bufferCount);
     }
   }
   
