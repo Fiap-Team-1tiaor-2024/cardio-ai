@@ -1,433 +1,629 @@
 [
-  {
-    "id": "cardioIA_flow",
-    "type": "tab",
-    "label": "CardioIA - Dashboard 2.0",
-    "disabled": false,
-    "info": "Sistema de monitoramento cardíaco usando Dashboard 2.0\nVersão: 3.0\nData: Outubro 2025"
-  },
-  {
-    "id": "cardioIA_base",
-    "type": "ui-base",
-    "name": "CardioIA Dashboard",
-    "path": "/dashboard",
-    "includeClientData": true,
-    "acceptsClientConfig": ["ui-notification", "ui-control"]
-  },
-  {
-    "id": "cardioIA_page",
-    "type": "ui-page",
-    "name": "Monitoramento Cardíaco",
-    "ui": "cardioIA_base",
-    "path": "/cardio",
-    "icon": "heart-pulse",
-    "layout": "grid",
-    "theme": "cardioIA_theme",
-    "order": 1
-  },
-  {
-    "id": "cardioIA_theme",
-    "type": "ui-theme",
-    "name": "CardioIA Theme",
-    "colors": {
-      "surface": "#1a1a1a",
-      "primary": "#ff6b6b",
-      "bgPage": "#f5f5f5",
-      "groupBg": "#ffffff",
-      "groupOutline": "#cccccc"
+    {
+        "id": "4012ee3d19494919",
+        "type": "tab",
+        "label": "CardioIA - Dashboard 2.0",
+        "disabled": false,
+        "info": "Sistema de monitoramento cardíaco usando Dashboard 2.0\nVersão: 3.0\nData: Outubro 2025"
     },
-    "sizes": {
-      "density": "default",
-      "pagePadding": "12px",
-      "groupGap": "12px",
-      "groupBorderRadius": "8px",
-      "widgetGap": "12px"
+    {
+        "id": "c9d68776675abd61",
+        "type": "mqtt in",
+        "z": "4012ee3d19494919",
+        "name": "Recebe Dados",
+        "topic": "cardioIA/health/data",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "d016238c278e89ea"
+            ]
+        ]
+    },
+    {
+        "id": "d016238c278e89ea",
+        "type": "json",
+        "z": "4012ee3d19494919",
+        "name": "Parse JSON",
+        "property": "payload",
+        "action": "obj",
+        "pretty": false,
+        "x": 290,
+        "y": 100,
+        "wires": [
+            [
+                "b3c097ea0876d75d",
+                "978be189e8546a8c"
+            ]
+        ]
+    },
+    {
+        "id": "b3c097ea0876d75d",
+        "type": "function",
+        "z": "4012ee3d19494919",
+        "name": "Extrai Dados dos Sensores",
+        "func": "// Extrai dados dos sensores do payload\n// DEBUG: Log completo do payload\nnode.warn(\"Payload recebido: \" + JSON.stringify(msg.payload));\n\nvar sensors = msg.payload.sensors;\n\nif (!sensors) {\n    node.warn(\"Payload sem dados de sensores\");\n    node.warn(\"Estrutura recebida: \" + JSON.stringify(msg.payload));\n    return null;\n}\n\n// Cria mensagens separadas para cada sensor\nvar tempMsg = {\n    payload: sensors.temperature_c || 0,\n    topic: \"temperature\"\n};\n\nvar bpmMsg = {\n    payload: sensors.bpm || 0,\n    topic: \"bpm\"\n};\n\nvar humidityMsg = {\n    payload: sensors.humidity_pct || 0,\n    topic: \"humidity\"\n};\n\nvar movementMsg = {\n    payload: sensors.movement_g || 0,\n    topic: \"movement\"\n};\n\n// Retorna array com 4 mensagens (4 outputs)\nreturn [tempMsg, bpmMsg, humidityMsg, movementMsg];",
+        "outputs": 4,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 100,
+        "wires": [
+            [
+                "8b58f2307dd9c5fe",
+                "f60254b18f3caea8"
+            ],
+            [
+                "0ddc99b6a142d8a0",
+                "5a45d913ef0d7c1a",
+                "89de308db341cb1c"
+            ],
+            [
+                "974a2c8b535052ce"
+            ],
+            [
+                "8e89e08631f24f04",
+                "29b07adf5889c001"
+            ]
+        ]
+    },
+    {
+        "id": "8b58f2307dd9c5fe",
+        "type": "ui-gauge",
+        "z": "4012ee3d19494919",
+        "name": "Temperatura",
+        "group": "cardioIA_group_vitals",
+        "order": 1,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Temperatura",
+        "alwaysShowTitle": false,
+        "units": "°C",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "35",
+                "color": "#0099ff",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "36",
+                "color": "#00ff00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "38",
+                "color": "#ffaa00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "38.5",
+                "color": "#ff0000",
+                "text": "",
+                "textType": "label"
+            }
+        ],
+        "min": 35,
+        "max": 40,
+        "sizeThickness": 16,
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 740,
+        "y": 60,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "0ddc99b6a142d8a0",
+        "type": "ui-gauge",
+        "z": "4012ee3d19494919",
+        "name": "BPM",
+        "group": "cardioIA_group_vitals",
+        "order": 2,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Batimentos Cardíacos",
+        "alwaysShowTitle": false,
+        "units": "BPM",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "40",
+                "color": "#ff0000",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "60",
+                "color": "#00ff00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "100",
+                "color": "#ffaa00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "120",
+                "color": "#ff0000",
+                "text": "",
+                "textType": "label"
+            }
+        ],
+        "min": 40,
+        "max": 150,
+        "sizeThickness": 16,
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 730,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "974a2c8b535052ce",
+        "type": "ui-gauge",
+        "z": "4012ee3d19494919",
+        "name": "Umidade",
+        "group": "cardioIA_group_vitals",
+        "order": 3,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Umidade do Ar",
+        "alwaysShowTitle": false,
+        "units": "%",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#ff9900",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "30",
+                "color": "#00ff00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "70",
+                "color": "#0099ff",
+                "text": "",
+                "textType": "label"
+            }
+        ],
+        "min": 0,
+        "max": 100,
+        "sizeThickness": 16,
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 740,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8e89e08631f24f04",
+        "type": "ui-gauge",
+        "z": "4012ee3d19494919",
+        "name": "Movimento",
+        "group": "cardioIA_group_vitals",
+        "order": 4,
+        "value": "payload",
+        "valueType": "msg",
+        "width": 3,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "needle",
+        "title": "Aceleração",
+        "alwaysShowTitle": false,
+        "units": "g",
+        "icon": "",
+        "prefix": "",
+        "suffix": "",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#00ff00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "1.5",
+                "color": "#ffaa00",
+                "text": "",
+                "textType": "label"
+            },
+            {
+                "from": "2",
+                "color": "#ff0000",
+                "text": "",
+                "textType": "label"
+            }
+        ],
+        "min": 0,
+        "max": 3,
+        "sizeThickness": 16,
+        "sizeGap": "",
+        "sizeKeyThickness": "",
+        "className": "",
+        "x": 740,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "5a45d913ef0d7c1a",
+        "type": "ui-chart",
+        "z": "4012ee3d19494919",
+        "group": "cardioIA_group_charts",
+        "name": "Gráfico BPM",
+        "label": "Histórico de Batimentos Cardíacos",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "Tempo",
+        "xAxisProperty": "",
+        "xAxisPropertyType": "timestamp",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "BPM",
+        "yAxisProperty": "",
+        "yAxisPropertyType": "property",
+        "ymin": "",
+        "ymax": "",
+        "bins": "",
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "triangle",
+        "pointRadius": "",
+        "showLegend": true,
+        "removeOlder": 5,
+        "removeOlderUnit": 60,
+        "removeOlderPoints": "",
+        "colors": [
+            "#ff6b6b",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000",
+            "#000000"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 12,
+        "height": 5,
+        "className": "",
+        "interpolation": "linear",
+        "x": 730,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f60254b18f3caea8",
+        "type": "function",
+        "z": "4012ee3d19494919",
+        "name": "Verifica Alerta Temperatura",
+        "func": "var temp = msg.payload;\n\nif (temp < 35.0) {\n    return {\n        payload: \"HIPOTERMIA! Temperatura: \" + temp.toFixed(1) + \" graus C\",\n        class: \"error\"\n    };\n} else if (temp > 38.5) {\n    return {\n        payload: \"FEBRE! Temperatura: \" + temp.toFixed(1) + \" graus C\",\n        class: \"error\"\n    };\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 780,
+        "y": 340,
+        "wires": [
+            [
+                "916a8aef726f1906"
+            ]
+        ]
+    },
+    {
+        "id": "89de308db341cb1c",
+        "type": "function",
+        "z": "4012ee3d19494919",
+        "name": "Verifica Alerta BPM",
+        "func": "var bpm = msg.payload;\n\nif (bpm < 50) {\n    return {\n        payload: \"BRADICARDIA! BPM: \" + bpm,\n        class: \"warning\"\n    };\n} else if (bpm > 120) {\n    return {\n        payload: \"TAQUICARDIA! BPM: \" + bpm,\n        class: \"error\"\n    };\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 760,
+        "y": 380,
+        "wires": [
+            [
+                "916a8aef726f1906"
+            ]
+        ]
+    },
+    {
+        "id": "29b07adf5889c001",
+        "type": "function",
+        "z": "4012ee3d19494919",
+        "name": "Verifica Alerta Movimento",
+        "func": "var movement = msg.payload;\n\nif (movement > 2.0) {\n    return {\n        payload: \"MOVIMENTO BRUSCO! Magnitude: \" + movement.toFixed(2) + \"g\",\n        class: \"warning\"\n    };\n}\n\nreturn null;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 780,
+        "y": 420,
+        "wires": [
+            [
+                "916a8aef726f1906"
+            ]
+        ]
+    },
+    {
+        "id": "916a8aef726f1906",
+        "type": "ui-notification",
+        "z": "4012ee3d19494919",
+        "ui": "cardioIA_base",
+        "position": "top right",
+        "colorDefault": true,
+        "displayTime": 5,
+        "showCountdown": true,
+        "outputs": 0,
+        "allowDismiss": true,
+        "dismissText": "Fechar",
+        "x": 1020,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "8a6c8e34e1a16995",
+        "type": "mqtt in",
+        "z": "4012ee3d19494919",
+        "name": "Recebe Alertas",
+        "topic": "cardioIA/health/alert",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 500,
+        "wires": [
+            [
+                "932086107254cf1d"
+            ]
+        ]
+    },
+    {
+        "id": "932086107254cf1d",
+        "type": "function",
+        "z": "4012ee3d19494919",
+        "name": "Formata Alerta MQTT",
+        "func": "var alert = msg.payload;\nvar severity = alert.severity || \"info\";\nvar message = alert.message || \"Alerta recebido\";\n\nvar classMap = {\n    \"critical\": \"error\",\n    \"warning\": \"warning\",\n    \"info\": \"info\"\n};\n\nreturn {\n    payload: \"ALERTA: \" + message,\n    class: classMap[severity] || \"info\"\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 350,
+        "y": 500,
+        "wires": [
+            [
+                "916a8aef726f1906"
+            ]
+        ]
+    },
+    {
+        "id": "71b0c0a30589d870",
+        "type": "mqtt in",
+        "z": "4012ee3d19494919",
+        "name": "Recebe Status",
+        "topic": "cardioIA/health/status",
+        "qos": "0",
+        "datatype": "json",
+        "broker": "mqtt_broker",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 130,
+        "y": 560,
+        "wires": [
+            [
+                "b597882813a4f3e5"
+            ]
+        ]
+    },
+    {
+        "id": "b597882813a4f3e5",
+        "type": "function",
+        "z": "4012ee3d19494919",
+        "name": "Formata Status",
+        "func": "var status = msg.payload.status || \"unknown\";\nvar uptime = msg.payload.uptime || 0;\n\nvar hours = Math.floor(uptime / 3600);\nvar minutes = Math.floor((uptime % 3600) / 60);\nvar seconds = uptime % 60;\n\nvar uptimeStr = hours + \"h \" + minutes + \"m \" + seconds + \"s\";\nvar icon = status === \"online\" ? \"OK\" : \"OFFLINE\";\n\nreturn {\n    payload: icon + \" - ESP32 \" + status.toUpperCase() + \" | Uptime: \" + uptimeStr\n};",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 340,
+        "y": 560,
+        "wires": [
+            [
+                "77f83b61055d9d4e"
+            ]
+        ]
+    },
+    {
+        "id": "77f83b61055d9d4e",
+        "type": "ui-text",
+        "z": "4012ee3d19494919",
+        "group": "cardioIA_group_alerts",
+        "order": 1,
+        "width": 12,
+        "height": 1,
+        "name": "Status ESP32",
+        "label": "",
+        "format": "{{msg.payload}}",
+        "layout": "row-center",
+        "style": false,
+        "className": "",
+        "x": 550,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "978be189e8546a8c",
+        "type": "debug",
+        "z": "4012ee3d19494919",
+        "name": "Debug",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 480,
+        "y": 40,
+        "wires": []
+    },
+    {
+        "id": "mqtt_broker",
+        "type": "mqtt-broker",
+        "name": "HiveMQ Cloud (CardioIA)",
+        "broker": "d5d56acfdf724f63a63b8281697371d1.s1.eu.hivemq.cloud",
+        "port": "8883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": true,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true
+    },
+    {
+        "id": "cardioIA_group_vitals",
+        "type": "ui-group",
+        "name": "Sinais Vitais",
+        "page": "cardioIA_page",
+        "width": 12,
+        "height": 1,
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false
+    },
+    {
+        "id": "cardioIA_group_charts",
+        "type": "ui-group",
+        "name": "Historico",
+        "page": "cardioIA_page",
+        "width": 12,
+        "height": 1,
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": true,
+        "disabled": false
+    },
+    {
+        "id": "cardioIA_base",
+        "type": "ui-base",
+        "name": "CardioIA Dashboard",
+        "path": "/dashboard",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ]
+    },
+    {
+        "id": "cardioIA_group_alerts",
+        "type": "ui-group",
+        "name": "Status do Sistema",
+        "page": "cardioIA_page",
+        "width": 12,
+        "height": 1,
+        "order": 3,
+        "showTitle": true,
+        "className": ""
+    },
+    {
+        "id": "cardioIA_page",
+        "type": "ui-page",
+        "name": "Monitoramento Cardíaco",
+        "ui": "cardioIA_base",
+        "path": "/cardio",
+        "icon": "heart-pulse",
+        "layout": "grid",
+        "theme": "cardioIA_theme",
+        "order": 1
+    },
+    {
+        "id": "cardioIA_theme",
+        "type": "ui-theme",
+        "name": "CardioIA Theme",
+        "colors": {
+            "surface": "#1a1a1a",
+            "primary": "#ff6b6b",
+            "bgPage": "#f5f5f5",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "8px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "8c67df940d700eab",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "@flowfuse/node-red-dashboard": "1.29.0"
+        }
     }
-  },
-  {
-    "id": "cardioIA_group_vitals",
-    "type": "ui-group",
-    "name": "Sinais Vitais",
-    "page": "cardioIA_page",
-    "width": 12,
-    "height": 1,
-    "order": 1,
-    "showTitle": true,
-    "className": "",
-    "visible": true,
-    "disabled": false
-  },
-  {
-    "id": "cardioIA_group_charts",
-    "type": "ui-group",
-    "name": "Historico",
-    "page": "cardioIA_page",
-    "width": 12,
-    "height": 1,
-    "order": 2,
-    "showTitle": true,
-    "className": ""
-  },
-  {
-    "id": "cardioIA_group_alerts",
-    "type": "ui-group",
-    "name": "Status do Sistema",
-    "page": "cardioIA_page",
-    "width": 12,
-    "height": 1,
-    "order": 3,
-    "showTitle": true,
-    "className": ""
-  },
-  {
-    "id": "mqtt_broker",
-    "type": "mqtt-broker",
-    "name": "HiveMQ Cloud (CardioIA)",
-    "broker": "d5d56acfdf724f63a63b8281697371d1.s1.eu.hivemq.cloud",
-    "port": "8883",
-    "clientid": "",
-    "autoConnect": true,
-    "usetls": true,
-    "protocolVersion": "4",
-    "keepalive": "60",
-    "cleansession": true,
-    "credentials": {
-      "user": "fiap-123",
-      "password": "Vaicorinthians123"
-    }
-  },
-  {
-    "id": "mqtt_in_data",
-    "type": "mqtt in",
-    "z": "cardioIA_flow",
-    "name": "Recebe Dados",
-    "topic": "cardioIA/health/data",
-    "qos": "0",
-    "datatype": "auto",
-    "broker": "mqtt_broker",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 120,
-    "y": 100,
-    "wires": [["parse_json"]]
-  },
-  {
-    "id": "parse_json",
-    "type": "json",
-    "z": "cardioIA_flow",
-    "name": "Parse JSON",
-    "property": "payload",
-    "action": "obj",
-    "pretty": false,
-    "x": 290,
-    "y": 100,
-    "wires": [["extract_sensors", "debug_data"]]
-  },
-  {
-    "id": "extract_sensors",
-    "type": "function",
-    "z": "cardioIA_flow",
-    "name": "Extrai Dados dos Sensores",
-    "func": "// Extrai dados dos sensores do payload\n// DEBUG: Log completo do payload\nnode.warn(\"Payload recebido: \" + JSON.stringify(msg.payload));\n\nvar sensors = msg.payload.sensors;\n\nif (!sensors) {\n    node.warn(\"Payload sem dados de sensores\");\n    node.warn(\"Estrutura recebida: \" + JSON.stringify(msg.payload));\n    return null;\n}\n\n// Cria mensagens separadas para cada sensor\nvar tempMsg = {\n    payload: sensors.temperature_c || 0,\n    topic: \"temperature\"\n};\n\nvar bpmMsg = {\n    payload: sensors.bpm || 0,\n    topic: \"bpm\"\n};\n\nvar humidityMsg = {\n    payload: sensors.humidity_pct || 0,\n    topic: \"humidity\"\n};\n\nvar movementMsg = {\n    payload: sensors.movement_g || 0,\n    topic: \"movement\"\n};\n\n// Retorna array com 4 mensagens (4 outputs)\nreturn [tempMsg, bpmMsg, humidityMsg, movementMsg];",
-    "outputs": 4,
-    "noerr": 0,
-    "initialize": "",
-    "finalize": "",
-    "libs": [],
-    "x": 500,
-    "y": 100,
-    "wires": [
-      ["gauge_temp", "alert_temp"],
-      ["gauge_bpm", "chart_bpm", "alert_bpm"],
-      ["gauge_humidity"],
-      ["gauge_movement", "alert_movement"]
-    ]
-  },
-  {
-    "id": "gauge_temp",
-    "type": "ui-gauge",
-    "z": "cardioIA_flow",
-    "name": "Temperatura",
-    "group": "cardioIA_group_vitals",
-    "order": 1,
-    "width": 3,
-    "height": 3,
-    "gtype": "gage-semi",
-    "title": "Temperatura",
-    "units": "°C",
-    "icon": "",
-    "prefix": "",
-    "suffix": "",
-    "min": 35,
-    "max": 40,
-    "sizeThickness": 16,
-    "gaugetype": "gage-semi",
-    "segments": [
-      {"from": 35, "to": 36, "color": "#0099ff"},
-      {"from": 36, "to": 38, "color": "#00ff00"},
-      {"from": 38, "to": 38.5, "color": "#ffaa00"},
-      {"from": 38.5, "to": 40, "color": "#ff0000"}
-    ],
-    "x": 740,
-    "y": 60,
-    "wires": []
-  },
-  {
-    "id": "gauge_bpm",
-    "type": "ui-gauge",
-    "z": "cardioIA_flow",
-    "name": "BPM",
-    "group": "cardioIA_group_vitals",
-    "order": 2,
-    "width": 3,
-    "height": 3,
-    "gtype": "gage-semi",
-    "title": "Batimentos Cardíacos",
-    "units": "BPM",
-    "icon": "",
-    "prefix": "",
-    "suffix": "",
-    "min": 40,
-    "max": 150,
-    "sizeThickness": 16,
-    "gaugetype": "gage-semi",
-    "segments": [
-      {"from": 40, "to": 60, "color": "#ff0000"},
-      {"from": 60, "to": 100, "color": "#00ff00"},
-      {"from": 100, "to": 120, "color": "#ffaa00"},
-      {"from": 120, "to": 150, "color": "#ff0000"}
-    ],
-    "x": 730,
-    "y": 100,
-    "wires": []
-  },
-  {
-    "id": "gauge_humidity",
-    "type": "ui-gauge",
-    "z": "cardioIA_flow",
-    "name": "Umidade",
-    "group": "cardioIA_group_vitals",
-    "order": 3,
-    "width": 3,
-    "height": 3,
-    "gtype": "gage-semi",
-    "title": "Umidade do Ar",
-    "units": "%",
-    "icon": "",
-    "prefix": "",
-    "suffix": "",
-    "min": 0,
-    "max": 100,
-    "sizeThickness": 16,
-    "gaugetype": "gage-semi",
-    "segments": [
-      {"from": 0, "to": 30, "color": "#ff9900"},
-      {"from": 30, "to": 70, "color": "#00ff00"},
-      {"from": 70, "to": 100, "color": "#0099ff"}
-    ],
-    "x": 740,
-    "y": 140,
-    "wires": []
-  },
-  {
-    "id": "gauge_movement",
-    "type": "ui-gauge",
-    "z": "cardioIA_flow",
-    "name": "Movimento",
-    "group": "cardioIA_group_vitals",
-    "order": 4,
-    "width": 3,
-    "height": 3,
-    "gtype": "gage-semi",
-    "title": "Aceleração",
-    "units": "g",
-    "icon": "",
-    "prefix": "",
-    "suffix": "",
-    "min": 0,
-    "max": 3,
-    "sizeThickness": 16,
-    "gaugetype": "gage-semi",
-    "segments": [
-      {"from": 0, "to": 1.5, "color": "#00ff00"},
-      {"from": 1.5, "to": 2.0, "color": "#ffaa00"},
-      {"from": 2.0, "to": 3, "color": "#ff0000"}
-    ],
-    "x": 740,
-    "y": 180,
-    "wires": []
-  },
-  {
-    "id": "chart_bpm",
-    "type": "ui-chart",
-    "z": "cardioIA_flow",
-    "name": "Gráfico BPM",
-    "group": "cardioIA_group_charts",
-    "order": 1,
-    "width": 12,
-    "height": 5,
-    "label": "Histórico de Batimentos Cardíacos",
-    "chartType": "line",
-    "legend": false,
-    "xAxisLabel": "Tempo",
-    "yAxisLabel": "BPM",
-    "removeOlder": 5,
-    "removeOlderUnit": 60,
-    "removeOlderPoints": "",
-    "colors": ["#ff6b6b"],
-    "textColor": ["#666666"],
-    "textColorDefault": true,
-    "gridColor": ["#e5e5e5"],
-    "gridColorDefault": true,
-    "x": 730,
-    "y": 260,
-    "wires": [[]]
-  },
-  {
-    "id": "alert_temp",
-    "type": "function",
-    "z": "cardioIA_flow",
-    "name": "Verifica Alerta Temperatura",
-    "func": "var temp = msg.payload;\n\nif (temp < 35.0) {\n    return {\n        payload: \"HIPOTERMIA! Temperatura: \" + temp.toFixed(1) + \" graus C\",\n        class: \"error\"\n    };\n} else if (temp > 38.5) {\n    return {\n        payload: \"FEBRE! Temperatura: \" + temp.toFixed(1) + \" graus C\",\n        class: \"error\"\n    };\n}\n\nreturn null;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 780,
-    "y": 340,
-    "wires": [["notification"]]
-  },
-  {
-    "id": "alert_bpm",
-    "type": "function",
-    "z": "cardioIA_flow",
-    "name": "Verifica Alerta BPM",
-    "func": "var bpm = msg.payload;\n\nif (bpm < 50) {\n    return {\n        payload: \"BRADICARDIA! BPM: \" + bpm,\n        class: \"warning\"\n    };\n} else if (bpm > 120) {\n    return {\n        payload: \"TAQUICARDIA! BPM: \" + bpm,\n        class: \"error\"\n    };\n}\n\nreturn null;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 760,
-    "y": 380,
-    "wires": [["notification"]]
-  },
-  {
-    "id": "alert_movement",
-    "type": "function",
-    "z": "cardioIA_flow",
-    "name": "Verifica Alerta Movimento",
-    "func": "var movement = msg.payload;\n\nif (movement > 2.0) {\n    return {\n        payload: \"MOVIMENTO BRUSCO! Magnitude: \" + movement.toFixed(2) + \"g\",\n        class: \"warning\"\n    };\n}\n\nreturn null;",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 780,
-    "y": 420,
-    "wires": [["notification"]]
-  },
-  {
-    "id": "notification",
-    "type": "ui-notification",
-    "z": "cardioIA_flow",
-    "ui": "cardioIA_base",
-    "position": "top right",
-    "colorDefault": true,
-    "displayTime": 5,
-    "showCountdown": true,
-    "outputs": 0,
-    "allowDismiss": true,
-    "dismissText": "Fechar",
-    "x": 1020,
-    "y": 380,
-    "wires": []
-  },
-  {
-    "id": "mqtt_in_alert",
-    "type": "mqtt in",
-    "z": "cardioIA_flow",
-    "name": "Recebe Alertas",
-    "topic": "cardioIA/health/alert",
-    "qos": "0",
-    "datatype": "json",
-    "broker": "mqtt_broker",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 130,
-    "y": 500,
-    "wires": [["format_alert"]]
-  },
-  {
-    "id": "format_alert",
-    "type": "function",
-    "z": "cardioIA_flow",
-    "name": "Formata Alerta MQTT",
-    "func": "var alert = msg.payload;\nvar severity = alert.severity || \"info\";\nvar message = alert.message || \"Alerta recebido\";\n\nvar classMap = {\n    \"critical\": \"error\",\n    \"warning\": \"warning\",\n    \"info\": \"info\"\n};\n\nreturn {\n    payload: \"ALERTA: \" + message,\n    class: classMap[severity] || \"info\"\n};",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 350,
-    "y": 500,
-    "wires": [["notification"]]
-  },
-  {
-    "id": "mqtt_in_status",
-    "type": "mqtt in",
-    "z": "cardioIA_flow",
-    "name": "Recebe Status",
-    "topic": "cardioIA/health/status",
-    "qos": "0",
-    "datatype": "json",
-    "broker": "mqtt_broker",
-    "nl": false,
-    "rap": true,
-    "rh": 0,
-    "inputs": 0,
-    "x": 130,
-    "y": 560,
-    "wires": [["format_status"]]
-  },
-  {
-    "id": "format_status",
-    "type": "function",
-    "z": "cardioIA_flow",
-    "name": "Formata Status",
-    "func": "var status = msg.payload.status || \"unknown\";\nvar uptime = msg.payload.uptime || 0;\n\nvar hours = Math.floor(uptime / 3600);\nvar minutes = Math.floor((uptime % 3600) / 60);\nvar seconds = uptime % 60;\n\nvar uptimeStr = hours + \"h \" + minutes + \"m \" + seconds + \"s\";\nvar icon = status === \"online\" ? \"OK\" : \"OFFLINE\";\n\nreturn {\n    payload: icon + \" - ESP32 \" + status.toUpperCase() + \" | Uptime: \" + uptimeStr\n};",
-    "outputs": 1,
-    "noerr": 0,
-    "x": 340,
-    "y": 560,
-    "wires": [["text_status"]]
-  },
-  {
-    "id": "text_status",
-    "type": "ui-text",
-    "z": "cardioIA_flow",
-    "name": "Status ESP32",
-    "group": "cardioIA_group_alerts",
-    "order": 1,
-    "width": 12,
-    "height": 1,
-    "label": "",
-    "format": "{{msg.payload}}",
-    "layout": "row-center",
-    "style": false,
-    "className": "",
-    "x": 550,
-    "y": 560,
-    "wires": []
-  },
-  {
-    "id": "debug_data",
-    "type": "debug",
-    "z": "cardioIA_flow",
-    "name": "Debug",
-    "active": true,
-    "tosidebar": true,
-    "console": false,
-    "tostatus": false,
-    "complete": "payload",
-    "targetType": "msg",
-    "statusVal": "",
-    "statusType": "auto",
-    "x": 480,
-    "y": 40,
-    "wires": []
-  }
 ]
