@@ -36,14 +36,14 @@ O **CardioIA** é um protótipo funcional de sistema de monitoramento de sinais 
 
 ### 🚨 Sistema de Alertas Automáticos
 
-| Condição | Alerta | Severidade |
-|----------|--------|------------|
-| Temperatura < 35°C | 🥶 HIPOTERMIA | Critical |
-| Temperatura > 38.5°C | 🔥 FEBRE | Warning |
-| BPM < 50 | ⚠️ BRADICARDIA | Critical |
-| BPM > 120 | 🚨 TAQUICARDIA | Warning |
-| Movimento > 2.0g | 🏃 MOVIMENTO BRUSCO | Info |
-| Umidade < 30% ou > 80% | 💧 UMIDADE INADEQUADA | Info |
+| Condição               | Alerta                | Severidade |
+| ---------------------- | --------------------- | ---------- |
+| Temperatura < 35°C     | 🥶 HIPOTERMIA         | Critical   |
+| Temperatura > 38.5°C   | 🔥 FEBRE              | Warning    |
+| BPM < 50               | ⚠️ BRADICARDIA        | Critical   |
+| BPM > 120              | 🚨 TAQUICARDIA        | Warning    |
+| Movimento > 2.0g       | 🏃 MOVIMENTO BRUSCO   | Info       |
+| Umidade < 30% ou > 80% | 💧 UMIDADE INADEQUADA | Info       |
 
 ---
 
@@ -96,9 +96,11 @@ platformio device monitor
 
 1. Importe o arquivo `node-red-flow-dashboard2.json` no Node-RED
 2. Instale `@flowfuse/node-red-dashboard` se necessário:
+
    ```bash
    npm install @flowfuse/node-red-dashboard
    ```
+
 3. Configure o broker MQTT (HiveMQ Cloud):
    - Host: `d5d56acfdf724f63a63b8281697371d1.s1.eu.hivemq.cloud`
    - Port: `8883` (TLS)
@@ -253,29 +255,38 @@ cardioIA/
 ## 🔍 Troubleshooting
 
 ### ❌ WiFi não conecta no Wokwi
+
 ✅ **Solução**: Use `WIFI_SSID = "Wokwi-GUEST"` e `WIFI_PASS = ""`
 
 ### ❌ MQTT retorna erro -2 (CONNECT_FAILED)
+
 ✅ **Solução**: Verifique credenciais HiveMQ e porta 8883
 
 ### ❌ Dashboard mostra valores zero
-✅ **Solução**: 
+
+✅ **Solução**:
+
 - Verifique se MQTT está conectado (LED fixo no ESP32)
 - Confirme tópicos no Node-RED: `cardioIA/health/data`
 - Veja logs no Debug do Node-RED
 
 ### ❌ Serial Monitor não mostra dados
+
 ✅ **Solução**: Configure baud rate para **115200** no Monitor Serial
 
 ### ❌ Erro de compilação "undefined reference"
-✅ **Solução**: 
+
+✅ **Solução**:
+
 ```powershell
 platformio run -t clean
 platformio run
 ```
 
 ### ❌ Node-RED Dashboard não carrega
-✅ **Solução**: 
+
+✅ **Solução**:
+
 ```bash
 # Instale o Dashboard 2.0
 npm install @flowfuse/node-red-dashboard
@@ -287,24 +298,56 @@ npm install @flowfuse/node-red-dashboard
 ## 📈 Recursos Utilizados
 
 ### Memória ESP32
+
 - **RAM**: 47.816 bytes (14.6% de 320KB)
 - **Flash**: 910.061 bytes (69.4% de 1.3MB)
 - **Buffer RAM**: ~50KB para 100 amostras
 
 ### Consumo de Energia (Estimado)
+
 - **Modo ativo**: ~240mA (WiFi + sensores)
 - **Modo sleep**: Não implementado (futuro)
 
 ### Taxa de Dados
+
 - **Leitura**: A cada 5 segundos
 - **Sincronização**: A cada 10 segundos (se offline)
 - **Throughput MQTT**: ~500 bytes por mensagem
 
 ---
 
-## 👥 Equipe FIAP - 1TIAOR (2025)
+## � Relatórios Técnicos
 
-Projeto desenvolvido como parte do curso de IoT da FIAP.
+Este projeto possui documentação técnica detalhada dividida em duas partes:
+
+### 📋 [Relatório Parte 1 - Edge Computing](./RELATORIO_PARTE1.md)
+
+Documentação técnica sobre a implementação de **Edge Computing** no ESP32:
+
+- Arquitetura de hardware e software
+- Sistema de buffer RAM circular (resiliência offline)
+- Estratégias de sincronização de dados
+- Processamento local de sinais vitais
+
+### 📋 [Relatório Parte 2 - Cloud & Dashboard](./RELATORIO_PARTE2.md)
+
+Documentação sobre a integração com **Cloud Computing** e visualização:
+
+- Arquitetura Cloud (HiveMQ)
+- Implementação MQTT TLS
+- Dashboard Node-RED 2.0
+- Análise de desempenho e métricas
+
+---
+
+## �👥 Equipe FIAP - 1TIAOR (2025)
+
+Projeto desenvolvido como parte do curso de IoT da FIAP pelos seguintes integrantes:
+
+- **Gabrielle Halasc** — RM560147@fiap.com.br
+- **Gabriela da Cunha** — RM561041@fiap.com.br
+- **Gustavo Segantini** — RM560111@fiap.com.br
+- **Vitor Lopes** — RM559858@fiap.com.br
 
 ---
 
@@ -312,3 +355,6 @@ Projeto desenvolvido como parte do curso de IoT da FIAP.
 
 Projeto educacional - CardioIA (2025)  
 Desenvolvido para fins acadêmicos - FIAP
+
+Este projeto é licenciado sob a **Licença MIT**.  
+Consulte o arquivo [`LICENSE`](../../LICENSE) para mais detalhes.
