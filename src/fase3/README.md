@@ -170,10 +170,10 @@ const char* WIFI_SSID = "Wokwi-GUEST";  // Para Wokwi
 const char* WIFI_PASS = "";             // Wokwi não precisa senha
 
 // MQTT Broker (HiveMQ Cloud - Configurado)
-const char* MQTT_BROKER = "d5d56acfdf724f63a63b8281697371d1.s1.eu.hivemq.cloud";
+const char* MQTT_BROKER = "broker.s1.eu.hivemq.cloud";
 const int   MQTT_PORT = 8883;           // MQTTS (TLS)
-const char* MQTT_USER = "fiap-123";
-const char* MQTT_PASS = "Vaicorinthians123";
+const char* MQTT_USER = "user";
+const char* MQTT_PASS = "password";
 
 // Tópicos MQTT
 const char* MQTT_TOPIC_DATA = "cardioIA/health/data";
