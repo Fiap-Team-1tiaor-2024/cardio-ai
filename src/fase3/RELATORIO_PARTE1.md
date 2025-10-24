@@ -339,4 +339,4 @@ A estratégia de buffer RAM oferece **simplicidade e confiabilidade** para o amb
 
 **Desenvolvido por:** Equipe CardioIA  
 **Data:** Outubro de 2025  
-**Link Wokwi:** [Projeto Wokwi](https://wokwi.com/projects/445451270741656577)
+**Link Wokwi:** [Projeto Wokwi](https://wokwi.com/projects/445451270741656577)](https://wokwi.com/projects/445451270741656577)
