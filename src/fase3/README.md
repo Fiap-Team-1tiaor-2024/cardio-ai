@@ -1,17 +1,13 @@
-# 🫀 CARDIO-IA - Sistema de Monitoramento Cardíaco IoT
+# 🫀 Fase 3 - Sistema de Monitoramento Cardíaco com IoT, Edge e Cloud Computing
 
-![Version](https://img.shields.io/badge/version-2.0-blue.svg)
-![Platform](https://img.shields.io/badge/platform-ESP32-green.svg)
-![Dashboard](https://img.shields.io/badge/Dashboard-Node--RED_2.0-red.svg)
-![License](https://img.shields.io/badge/license-MIT-orange.svg)
+O **Cardio AI** é um sistema de **monitoramento inteligente de sinais vitais** desenvolvido como parte da **Fase 3** do curso de IoT da FIAP (1TIAOR).  
 
-Sistema completo de monitoramento de sinais vitais com **Edge Computing**, **resiliência offline** e **visualização em tempo real** via MQTT e **Node-RED Dashboard 2.0**.
+O projeto demonstra, de forma prática, os conceitos de **Edge Computing**, **Fog Computing** e **Cloud Computing** aplicados à área da **saúde digital**.
 
----
+## 🎯 Objetivo do Projeto
 
-## 🎯 Sobre o Projeto
+O propósito do **Cardio AI - Fase 3** é simular um ambiente de **monitoramento remoto de pacientes cardiológicos**, com **coleta local de dados fisiológicos**, **resiliência offline**, **transmissão segura à nuvem via MQTT** e **visualização em tempo real** em um **dashboard interativo** no Node-RED.
 
-O **CardioIA** é um protótipo funcional de sistema de monitoramento de sinais vitais que simula a captura de dados de pacientes cardiológicos. Desenvolvido como parte do curso de IoT da FIAP (1TIAOR), o projeto demonstra conceitos avançados de:
 
 - **Edge Computing** - Processamento local com buffer RAM (resiliência offline)
 - **Fog Computing** - Camada intermediária de processamento (Node-RED)
@@ -45,7 +41,6 @@ O **CardioIA** é um protótipo funcional de sistema de monitoramento de sinais 
 | Movimento > 2.0g       | 🏃 MOVIMENTO BRUSCO   | Info       |
 | Umidade < 30% ou > 80% | 💧 UMIDADE INADEQUADA | Info       |
 
----
 
 ## 🔧 Hardware Utilizado
 
@@ -67,8 +62,6 @@ O **CardioIA** é um protótipo funcional de sistema de monitoramento de sinais 
 - LittleFS v2.0.0 - Sistema de arquivos (incluído, mas desabilitado para Wokwi)
 
 > **Nota:** O projeto usa **buffer RAM** ao invés de filesystem para compatibilidade total com Wokwi.
-
----
 
 ## 🚀 Como Usar
 
@@ -107,8 +100,6 @@ platformio device monitor
    - Usuário: `fiap-123`
    - Senha: `Vaicorinthians123`
 4. Deploy e acesse `http://localhost:1880/dashboard`
-
----
 
 ## 📊 Dados Capturados (Formato JSON)
 
@@ -158,8 +149,6 @@ platformio device monitor
 }
 ```
 
----
-
 ## ⚙️ Configuração
 
 Edite as credenciais em `src/cardioia.ino`:
@@ -182,8 +171,6 @@ const char* MQTT_TOPIC_STATUS = "cardioIA/health/status";
 ```
 
 > **Para uso próprio:** Altere para suas credenciais WiFi e MQTT broker.
-
----
 
 ## 🧠 Arquitetura do Sistema
 
@@ -223,7 +210,7 @@ const char* MQTT_TOPIC_STATUS = "cardioIA/health/status";
 └─────────────────────────────────────────────────────────────┘
 ```
 
-### Fluxo de Dados
+### ☁️ Fluxo de Dados
 
 1. **Coleta**: ESP32 lê sensores a cada 5 segundos
 2. **Edge**: Dados salvos em buffer RAM (resiliência offline)
@@ -231,8 +218,6 @@ const char* MQTT_TOPIC_STATUS = "cardioIA/health/status";
 4. **Sincronização**: Buffer é sincronizado quando retorna online
 5. **Processamento**: Node-RED processa e exibe no Dashboard
 6. **Alertas**: Condições críticas geram alertas automáticos
-
----
 
 ## 📁 Estrutura do Projeto
 
@@ -249,8 +234,6 @@ cardioIA/
 ├── RELATORIO_PARTE1.md          # Relatório Edge Computing
 └── RELATORIO_PARTE2.md          # Relatório Cloud + Dashboard
 ```
-
----
 
 ## 🔍 Troubleshooting
 
@@ -293,8 +276,6 @@ npm install @flowfuse/node-red-dashboard
 # Reinicie Node-RED
 ```
 
----
-
 ## 📈 Recursos Utilizados
 
 ### Memória ESP32
@@ -314,13 +295,12 @@ npm install @flowfuse/node-red-dashboard
 - **Sincronização**: A cada 10 segundos (se offline)
 - **Throughput MQTT**: ~500 bytes por mensagem
 
----
 
-## � Relatórios Técnicos
+## 📋 Relatórios Técnicos
 
 Este projeto possui documentação técnica detalhada dividida em duas partes:
 
-### 📋 [Relatório Parte 1 - Edge Computing](./RELATORIO_PARTE1.md)
+### [Relatório Parte 1 - Edge Computing](./RELATORIO_PARTE1.md)
 
 Documentação técnica sobre a implementação de **Edge Computing** no ESP32:
 
@@ -329,7 +309,7 @@ Documentação técnica sobre a implementação de **Edge Computing** no ESP32:
 - Estratégias de sincronização de dados
 - Processamento local de sinais vitais
 
-### 📋 [Relatório Parte 2 - Cloud & Dashboard](./RELATORIO_PARTE2.md)
+### [Relatório Parte 2 - Cloud & Dashboard](./RELATORIO_PARTE2.md)
 
 Documentação sobre a integração com **Cloud Computing** e visualização:
 
@@ -338,22 +318,9 @@ Documentação sobre a integração com **Cloud Computing** e visualização:
 - Dashboard Node-RED 2.0
 - Análise de desempenho e métricas
 
----
-
-## �👥 Equipe FIAP - 1TIAOR (2025)
-
-Projeto desenvolvido como parte do curso de IoT da FIAP pelos seguintes integrantes:
-
-- **Gabrielle Halasc** — RM560147@fiap.com.br
-- **Gabriela da Cunha** — RM561041@fiap.com.br
-- **Gustavo Segantini** — RM560111@fiap.com.br
-- **Vitor Lopes** — RM559858@fiap.com.br
-
----
-
 ## 📄 Licença
 
-Projeto educacional - CardioIA (2025)  
+Projeto educacional - Cardio AI (2025)  
 Desenvolvido para fins acadêmicos - FIAP
 
 Este projeto é licenciado sob a **Licença MIT**.  
