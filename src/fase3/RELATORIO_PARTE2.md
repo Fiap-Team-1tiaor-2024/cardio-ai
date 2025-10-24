@@ -606,5 +606,5 @@ Este protótipo pode ser evoluído para:
 **Desenvolvido por:** Equipe CardioIA  
 **Data:** Outubro de 2025  
 **Versão:** 2.0  
-**Link Dashboard:** http://localhost:1880/ui (após configuração)  
+**Link Dashboard:** http://localhost:1880/dashboard (após configuração)  
 **Link Wokwi:** [Será atualizado após publicação]
