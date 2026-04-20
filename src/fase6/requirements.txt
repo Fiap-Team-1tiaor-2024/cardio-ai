@@ -1,0 +1,9 @@
+# Dependencias para executar src/fase6/main.py
+numpy>=1.26
+pandas>=2.2
+polars>=1.0
+pyarrow>=16.0
+scikit-learn>=1.4
+matplotlib>=3.8
+seaborn>=0.13
+joblib>=1.4

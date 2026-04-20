@@ -1,1 +1,5 @@
 /src/fase2/cardio-ai-mlp/src/imagem/
+
+__pycache__/
+
+.vscode/
