@@ -10,3 +10,4 @@ joblib>=1.4
 openai-agents
 openai
 pydantic
+python-dotenv

@@ -3,9 +3,23 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
-COLAB_DATASET_PATH = Path(
-    "C:/Dev/Projetos/FIAP/Ano 2/Fase 1/cardio-ai/src/fase1/assets/dataset/cardio_train.csv"
-)
+
+FEATURE_NAMES: list[str] = [
+    "gender",
+    "height",
+    "weight",
+    "ap_hi",
+    "ap_lo",
+    "cholesterol",
+    "gluc",
+    "smoke",
+    "alco",
+    "active",
+    "age_years",
+    "imc",
+    "pulse_pressure",
+]
+
 
 @dataclass(frozen=True)
 class TrainingConfig:
@@ -26,11 +40,11 @@ class TrainingConfig:
         }
     )
 
+
 def _resolve_dataset_path(base_dir: Path) -> Path:
     candidates = [
         base_dir / "dataset" / "cardio_train.csv",
         base_dir.parent / "dataset" / "cardio_train.csv",
-        COLAB_DATASET_PATH,
     ]
 
     for path in candidates:
@@ -38,6 +52,7 @@ def _resolve_dataset_path(base_dir: Path) -> Path:
             return path
 
     return candidates[0]
+
 
 def get_default_config() -> TrainingConfig:
     fase6_dir = Path(__file__).resolve().parents[1]

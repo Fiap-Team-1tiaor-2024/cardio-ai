@@ -35,12 +35,13 @@ O **CardioAI** é um pipeline inteligente dividido em duas partes:
 ```
 fase6/
 ├── main.py                          # Parte 1 – Pipeline de treinamento
-├── main_parte2.py                   # Parte 2 – Sistema Multiagente
+├── main_multiagent.py               # Parte 2 – Sistema Multiagente
 │
 ├── cardio_ai_model/
+│   ├── __init__.py
 │   ├── config/
 │   │   ├── __init__.py
-│   │   └── config.py                # Configurações e hiperparâmetros
+│   │   └── config.py                # Configurações e FEATURE_NAMES
 │   ├── datapipeline/
 │   │   ├── __init__.py
 │   │   ├── analysis.py              # Heatmap e importância de features
@@ -48,9 +49,16 @@ fase6/
 │   │   ├── evaluation.py            # Métricas, curva ROC, matriz de confusão
 │   │   ├── inference.py             # Predição para novos pacientes
 │   │   └── persistence.py           # Salvamento do modelo
-│   └── training/
+│   ├── training/
+│   │   ├── __init__.py
+│   │   └── training.py              # Treinamento com GridSearchCV
+│   └── agents/
 │       ├── __init__.py
-│       └── training.py              # Treinamento com GridSearchCV
+│       ├── schemas.py               # Schemas Pydantic
+│       ├── protocols.py             # Base de protocolos clínicos
+│       ├── analyst.py               # Agente Analista de Risco
+│       ├── specialist.py            # Agente Especialista em Protocolos
+│       └── orchestrator.py          # Agente Orquestrador
 │
 ├── artifacts/
 │   └── modelo_risco_cardiaco.pkl    # Modelo treinado (gerado pela Parte 1)

@@ -1,5 +1,12 @@
+# Path
 /src/fase2/cardio-ai-mlp/src/imagem/
+/src/fase6/cardio_ai_model/artifacts/
 
+# Python
 __pycache__/
 
+# VS Code
 .vscode/
+
+# Environment variables
+.env
