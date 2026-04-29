@@ -24,3 +24,4 @@ class RecomendacaoFinal(BaseModel):
     protocolos: list[str]
     observacoes: str
     historico: list[str]
+    texto_formatado: str | None = None

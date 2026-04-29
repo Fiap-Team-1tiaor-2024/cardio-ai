@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import json
 import os
+
+from dotenv import load_dotenv
 from typing import TYPE_CHECKING
 
 from openai import AsyncOpenAI
-from pydantic import BaseModel
 
-from .schemas import RecomendacaoFinal, RiskScore
+from .schemas import RecomendacaoFinal
+
+load_dotenv()
 
 if TYPE_CHECKING:
     from .analyst import AgenteAnalistaRisco
@@ -36,11 +39,9 @@ class AgenteOrquestrador:
         self.especialista = especialista
         self.historico: list[str] = []
 
-    async def _gerar_texto_final_llm(
+    async def _gerar_texto_formatado_llm(
         self,
-        nome: str,
-        risco: RiskScore,
-        protocolo: BaseModel,
+        recomendacao: RecomendacaoFinal,
     ) -> str:
         prompt = f"""
 Você é o Agente Orquestrador da Cardio AI.
@@ -55,12 +56,14 @@ Monte uma resposta final clara, objetiva e profissional em português, com esta 
 6. Observações
 
 Dados:
-Paciente: {nome}
-Probabilidade: {risco.probabilidade_pct}
-Classificação: {risco.classificacao}
-Urgência: {protocolo.urgencia}
-Protocolos: {json.dumps(protocolo.protocolos, ensure_ascii=False)}
-Observações: {protocolo.observacoes}
+{json.dumps({
+    "paciente": recomendacao.paciente,
+    "probabilidade": recomendacao.probabilidade_pct,
+    "classificacao": recomendacao.classificacao,
+    "urgencia": recomendacao.urgencia,
+    "protocolos": recomendacao.protocolos,
+    "observacoes": recomendacao.observacoes,
+}, ensure_ascii=False)}
 
 Não invente dados. Use apenas as informações fornecidas.
         """.strip()
@@ -70,7 +73,7 @@ Não invente dados. Use apenas as informações fornecidas.
             messages=[
                 {
                     "role": "system",
-                    "content": "Você organiza respostas finais de um sistema multiagente de risco cardíaco.",
+                    "content": "Você formata respostas finais de um sistema multiagente de risco cardíaco.",
                 },
                 {"role": "user", "content": prompt},
             ],
@@ -87,31 +90,26 @@ Não invente dados. Use apenas as informações fornecidas.
         self.historico = []
         self.historico.append(f"Orquestrador recebeu o paciente: {nome}")
 
-        self.historico.append("Handoff -> Agente Analista de Risco")
+        self.historico.append("Tool: calcular_risco_cardiaco")
         risco = self.analista.executar(dados_paciente)
         self.historico.append(
             f"Analista retornou {risco.classificacao} com probabilidade {risco.probabilidade_pct}"
         )
 
-        self.historico.append("Handoff -> Agente Especialista em Protocolos")
+        self.historico.append("Tool: consultar_protocolos")
         protocolo = self.especialista.executar(risco.classificacao)
         self.historico.append(
             f"Especialista retornou {len(protocolo.protocolos)} protocolos e urgencia {protocolo.urgencia}"
         )
 
-        self.historico.append("Orquestrador consolidou a resposta final com apoio do LLM")
+        self.historico.append("Tool: gerar_recomendacao_final")
+        recomendacao = self.especialista.gerar_recomendacao(nome, risco, protocolo)
+        recomendacao.historico = self.historico.copy()
+
         try:
-            _ = await self._gerar_texto_final_llm(nome, risco, protocolo)
+            recomendacao.texto_formatado = await self._gerar_texto_formatado_llm(recomendacao)
         except Exception as e:
             print("Aviso: nao foi possivel usar o LLM para formatacao final.")
             print(f"Detalhes: {e}")
 
-        return RecomendacaoFinal(
-            paciente=nome,
-            probabilidade_pct=risco.probabilidade_pct,
-            classificacao=risco.classificacao,
-            urgencia=protocolo.urgencia,
-            protocolos=protocolo.protocolos,
-            observacoes=protocolo.observacoes,
-            historico=self.historico.copy(),
-        )
+        return recomendacao
