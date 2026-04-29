@@ -6,6 +6,11 @@ O sistema combina um modelo de Machine Learning supervisionado com uma arquitetu
 
 ---
 
+## 🎥 Vídeo de Demonstração
+[Link do vídeo](https://youtu.be/6uRws88MWXM)
+
+---
+
 ## 📋 Sumário
 
 - [Visão Geral](#visão-geral)
