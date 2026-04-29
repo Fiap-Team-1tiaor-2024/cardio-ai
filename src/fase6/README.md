@@ -2,7 +2,7 @@
 
 Projeto desenvolvido para a **Fase 6** da graduação em Inteligência Artificial para Devs – FIAP.
 
-O sistema combina um modelo de Machine Learning supervisionado com uma arquitetura multiagente baseada no **OpenAI Agents SDK**, capaz de prever riscos cardíacos e recomendar protocolos clínicos de forma automatizada e colaborativa entre agentes especializados.
+O sistema combina um modelo de Machine Learning supervisionado com uma arquitetura multiagente customizada, capaz de prever riscos cardíacos e recomendar protocolos clínicos de forma automatizada e colaborativa entre agentes especializados.
 
 ---
 
@@ -12,10 +12,11 @@ O sistema combina um modelo de Machine Learning supervisionado com uma arquitetu
 - [Estrutura do Projeto](#estrutura-do-projeto)
 - [Parte 1 – Modelo Preditivo](#parte-1--modelo-preditivo)
 - [Parte 2 – Sistema Multiagente](#parte-2--sistema-multiagente)
+- [Explicação Técnica: Handoffs e Tools](#explicação-técnica-handoffs-e-tools)
+- [Exemplo Real de Execução](#exemplo-real-de-execução)
 - [Instalação](#instalação)
 - [Como Executar](#como-executar)
 - [Tecnologias Utilizadas](#tecnologias-utilizadas)
-- [Equipe](#equipe)
 
 ---
 
@@ -56,6 +57,7 @@ fase6/
 │       ├── __init__.py
 │       ├── schemas.py               # Schemas Pydantic
 │       ├── protocols.py             # Base de protocolos clínicos
+│       ├── tools.py                 # Tools (calcular_risco, consultar_protocolos)
 │       ├── analyst.py               # Agente Analista de Risco
 │       ├── specialist.py            # Agente Especialista em Protocolos
 │       └── orchestrator.py          # Agente Orquestrador
@@ -118,7 +120,7 @@ Usuário
    │
    ▼
 ┌─────────────────┐
-│   Orquestrador  │  ← ponto de entrada
+│  Orquestrador   │  ← ponto de entrada
 └────────┬────────┘
          │ handoff
          ▼
@@ -138,45 +140,348 @@ Usuário
 
 ### Agentes
 
+#### 🎯 Agente Orquestrador
+- **Responsabilidade:** Ponto de entrada do sistema
+- **Entrada:** JSON com dados clínicos do paciente
+- **Ação:** Delega ao Analista de Risco via handoff
+- **Formatação:** Utiliza Gemini para formatar a resposta final em texto legível
+
 #### 🔍 Agente Analista de Risco
-- Recebe os dados clínicos do paciente em JSON
-- Chama a tool `calcular_risco_cardiaco` que carrega o modelo `.pkl` e retorna a probabilidade
-- Classifica o risco em **ALTO**, **MODERADO** ou **BAIXO**
-- Faz handoff para o Agente Especialista em Protocolos
+- **Responsabilidade:** Calcular probabilidade de risco cardíaco
+- **Entrada:** Dados clínicos do paciente
+- **Tool utilizada:** `calcular_risco_cardiaco`
+- **Saída:** `RiskScore` (probabilidade + classificação)
+- **Ação:** Faz handoff para o Especialista em Protocolos
 
 #### 📋 Agente Especialista em Protocolos
-- Recebe a classificação de risco
-- Chama a tool `consultar_protocolos` para buscar na base simulada
-- Chama a tool `gerar_recomendacao_final` para montar a resposta estruturada
-- Valida o schema de saída com Pydantic
+- **Responsabilidade:** Recomendar protocolos clínicos
+- **Entrada:** Classificação de risco do Analista
+- **Tools utilizadas:** 
+  - `consultar_protocolos` – busca protocolos na base
+  - `gerar_recomendacao_final` – monta recomendação estruturada
+- **Saída:** `RecomendacaoFinal` validada com Pydantic
 
-#### 🎯 Agente Orquestrador
-- Ponto de entrada do sistema
-- Recebe os dados do paciente e delega ao Analista de Risco via handoff
-- Coordena o fluxo completo
+---
 
-### Exemplo de Saída
+## Explicação Técnica: Handoffs e Tools
+
+### Arquitetura de Handoffs
+
+Este projeto implementa uma **arquitetura multiagente customizada** utilizando classes Python e transferência de contexto entre agentes. O mecanismo de **handoff** permite que cada agente delegue a execução para o próximo, passando os dados processados.
+
+#### Fluxo de Transferência de Contexto
+
+```
+┌──────────────┐    dados_paciente     ┌──────────────┐
+│              │ ──────────────────────►│              │
+│ Orquestrador │                        │   Analista   │
+│              │                        │              │
+└──────────────┘                        └──────┬───────┘
+                                               │
+                                               │ RiskScore
+                                               ▼
+                                        ┌──────────────┐
+                                        │              │
+                                        │ Especialista │
+                                        │              │
+                                        └──────────────┘
+```
+
+**Exemplo de implementação de handoff:**
+
+```python
+class OrquestradorAgent:
+    def processar(self, dados_paciente):
+        # Delega para o Analista
+        risk_score = self.analista.analisar(dados_paciente)
+        
+        # Delega para o Especialista
+        recomendacao = self.especialista.recomendar(risk_score)
+        
+        return recomendacao
+```
+
+---
+
+### Tools Implementadas
+
+As tools são funções especializadas que executam tarefas específicas. Cada tool possui entrada tipada (Pydantic), processamento interno e saída estruturada.
+
+#### 1️⃣ `calcular_risco_cardiaco`
+
+**Propósito:** Calcular a probabilidade de risco cardíaco usando o modelo treinado
+
+**Entrada (DadosPaciente):**
+```python
+{
+    "gender": 2,
+    "height": 172,
+    "weight": 84,
+    "ap_hi": 138,
+    "ap_lo": 88,
+    "cholesterol": 2,
+    "gluc": 1,
+    "smoke": 0,
+    "alco": 0,
+    "active": 1,
+    "age_years": 52,
+    "imc": 28.39,
+    "pulse_pressure": 50
+}
+```
+
+**Processamento:**
+1. Valida se todos os campos de `FEATURE_NAMES` estão presentes
+2. Converte o dict para array NumPy na ordem correta das features
+3. Carrega o modelo `.pkl` usando `joblib.load()`
+4. Executa `model.predict_proba()` para obter probabilidade da classe positiva
+5. Classifica: `probabilidade >= 0.5` → "ALTO RISCO", caso contrário → "BAIXO RISCO"
+
+**Saída (RiskScore):**
+```python
+RiskScore(
+    probabilidade=0.6734,
+    classificacao="ALTO RISCO",
+    probabilidade_pct="67.34%"
+)
+```
+
+**Código simplificado:**
+```python
+def calcular_risco_cardiaco(dados: DadosPaciente) -> RiskScore:
+    # Carrega modelo
+    model = joblib.load("artifacts/modelo_risco_cardiaco.pkl")
+    
+    # Prepara features
+    features = [dados.dict()[f] for f in FEATURE_NAMES]
+    X = np.array(features).reshape(1, -1)
+    
+    # Predição
+    prob = model.predict_proba(X)[0][1]
+    classificacao = "ALTO RISCO" if prob >= 0.5 else "BAIXO RISCO"
+    
+    return RiskScore(
+        probabilidade=prob,
+        classificacao=classificacao,
+        probabilidade_pct=f"{prob*100:.2f}%"
+    )
+```
+
+---
+
+#### 2️⃣ `consultar_protocolos`
+
+**Propósito:** Buscar protocolos clínicos recomendados com base no nível de risco
+
+**Entrada:** String de classificação (`"ALTO RISCO"` ou `"BAIXO RISCO"`)
+
+**Base de Dados (PROTOCOLS_DB):**
+```python
+PROTOCOLS_DB = {
+    "ALTO RISCO": {
+        "protocolos": [
+            "P-001: Encaminhamento imediato para cardiologista",
+            "P-002: Monitoramento contínuo de pressão arterial (24h)",
+            "P-003: ECG de repouso e de esforço",
+            "P-004: Exames laboratoriais completos",
+            "P-005: Avaliação medicamentosa especializada"
+        ],
+        "urgencia": "ALTA – Consulta em até 24 horas"
+    },
+    "BAIXO RISCO": {
+        "protocolos": [
+            "P-011: Consulta cardiológica de rotina anual",
+            "P-012: Manutenção de hábitos saudáveis",
+            "P-013: Monitoramento periódico da pressão arterial"
+        ],
+        "urgencia": "BAIXA – Acompanhamento preventivo"
+    }
+}
+```
+
+**Saída (ProtocoloSaida):**
+```python
+ProtocoloSaida(
+    nivel="ALTO RISCO",
+    protocolos=[
+        "P-001: Encaminhamento imediato...",
+        "P-002: Monitoramento contínuo...",
+        ...
+    ],
+    urgencia="ALTA – Consulta em até 24 horas"
+)
+```
+
+---
+
+#### 3️⃣ `gerar_recomendacao_final`
+
+**Propósito:** Combinar paciente, risco e protocolos em uma recomendação estruturada
+
+**Entrada:**
+- `nome_paciente`: String (ex: "Carlos, 52 anos")
+- `risk_score`: Objeto `RiskScore`
+- `protocolos`: Objeto `ProtocoloSaida`
+
+**Saída (RecomendacaoFinal):**
+```python
+RecomendacaoFinal(
+    paciente="Carlos, 52 anos",
+    probabilidade_pct="67.34%",
+    classificacao="ALTO RISCO",
+    urgencia="ALTA – Consulta em até 24 horas",
+    protocolos=[...],
+    observacoes="Paciente apresenta combinação relevante de fatores..."
+)
+```
+
+**Código simplificado:**
+```python
+def gerar_recomendacao_final(
+    nome_paciente: str,
+    risk_score: RiskScore,
+    protocolos: ProtocoloSaida
+) -> RecomendacaoFinal:
+    
+    obs = (
+        "Paciente apresenta combinação relevante de fatores de risco. "
+        "Recomendado acompanhamento prioritário."
+        if risk_score.classificacao == "ALTO RISCO"
+        else "Manter hábitos saudáveis e acompanhamento preventivo."
+    )
+    
+    return RecomendacaoFinal(
+        paciente=nome_paciente,
+        probabilidade_pct=risk_score.probabilidade_pct,
+        classificacao=risk_score.classificacao,
+        urgencia=protocolos.urgencia,
+        protocolos=protocolos.protocolos,
+        observacoes=obs
+    )
+```
+
+---
+
+## Exemplo Real de Execução
+
+### Entrada: JSON do Paciente
+
+```json
+{
+    "nome": "Carlos, 52 anos",
+    "dados_clinicos": {
+        "gender": 2,
+        "height": 172,
+        "weight": 84,
+        "ap_hi": 138,
+        "ap_lo": 88,
+        "cholesterol": 2,
+        "gluc": 1,
+        "smoke": 0,
+        "alco": 0,
+        "active": 1,
+        "age_years": 52,
+        "imc": 28.39,
+        "pulse_pressure": 50
+    }
+}
+```
+
+### Saída: Terminal
 
 ```
 ============================================================
-    RECOMENDACAO CARDIO AI - SISTEMA MULTIAGENTE
+         CARDIO AI - SISTEMA PREDITIVO MULTIAGENTE
 ============================================================
-Paciente          : Carlos, 52 anos
-Probabilidade     : 67.34%
-Classificacao     : RISCO MODERADO
-Urgencia          : MODERADA – Consulta em ate 7 dias
 
-Protocolos Sugeridos:
-  - P-006: Agendamento de consulta cardiologica em ate 7 dias
-  - P-007: Monitoramento semanal de pressao arterial
-  - P-008: Orientacao nutricional e controle de peso
-  - P-009: Programa de atividade fisica supervisionada
-  - P-010: Reavaliacao laboratorial em 30 dias
+Paciente       : Carlos, 52 anos
+Probabilidade  : 67.34%
+Classificação  : ALTO RISCO
+Urgência       : ALTA – Consulta em até 24 horas
 
-Observacoes: Paciente possui fatores de risco controlados,
-mas exige acompanhamento preventivo estruturado.
+Protocolos sugeridos:
+  • P-001: Encaminhamento imediato para cardiologista
+  • P-002: Monitoramento contínuo de pressão arterial (24h)
+  • P-003: ECG de repouso e de esforço
+  • P-004: Exames laboratoriais completos
+  • P-005: Avaliação medicamentosa especializada
+
+Observações: Paciente apresenta combinação relevante de
+fatores de risco. Recomendado acompanhamento prioritário.
+
+============================================================
+       Histórico do fluxo multiagente executado
+============================================================
+[ORQUESTRADOR] Recebeu dados do paciente
+[ANALISTA]     Tool: calcular_risco_cardiaco → 67.34%
+[ESPECIALISTA] Tool: consultar_protocolos → 5 protocolos
+[ESPECIALISTA] Tool: gerar_recomendacao_final → Sucesso
+[ORQUESTRADOR] Formatação final com Gemini → Concluída
 ============================================================
 ```
+
+---
+
+### Diagrama de Sequência Detalhado
+
+```
+USUÁRIO      ORQUESTRADOR    ANALISTA    ESPECIALISTA    GEMINI
+   │               │             │             │            │
+   │──(1)──────────►│             │             │            │
+   │  Dados JSON   │             │             │            │
+   │               │             │             │            │
+   │               │──(2)────────►│             │            │
+   │               │   handoff   │             │            │
+   │               │             │             │            │
+   │               │             │──(3)────────┐            │
+   │               │             │   Tool:     │            │
+   │               │             │   calcular_ │            │
+   │               │             │   risco()   │            │
+   │               │             │◄────────────┘            │
+   │               │             │  RiskScore  │            │
+   │               │             │             │            │
+   │               │◄────(4)─────│             │            │
+   │               │  RiskScore  │             │            │
+   │               │             │             │            │
+   │               │──(5)────────────────────►│            │
+   │               │         handoff          │            │
+   │               │                          │            │
+   │               │                          │──(6)───────┐
+   │               │                          │   Tool:    │
+   │               │                          │   consultar│
+   │               │                          │   _protoc()│
+   │               │                          │◄───────────┘
+   │               │                          │            │
+   │               │                          │──(7)───────┐
+   │               │                          │   Tool:    │
+   │               │                          │   gerar_   │
+   │               │                          │   rec()    │
+   │               │                          │◄───────────┘
+   │               │                          │            │
+   │               │◄────(8)──────────────────│            │
+   │               │    RecomendacaoFinal     │            │
+   │               │                          │            │
+   │               │──(9)──────────────────────────────────►│
+   │               │         formatação                     │
+   │               │◄────(10)──────────────────────────────│
+   │               │        texto final                     │
+   │               │                          │            │
+   │◄──(11)────────│                          │            │
+      resposta     │                          │            │
+```
+
+**Legenda:**
+1. Usuário envia dados clínicos do paciente
+2. Orquestrador → Analista (handoff com dados_paciente)
+3. Analista executa tool `calcular_risco_cardiaco`
+4. RiskScore retornado ao Orquestrador
+5. Orquestrador → Especialista (handoff com RiskScore)
+6. Especialista executa tool `consultar_protocolos`
+7. Especialista executa tool `gerar_recomendacao_final`
+8. RecomendacaoFinal retornada ao Orquestrador
+9. Orquestrador envia para Gemini formatar
+10. Texto formatado retornado
+11. Resposta final apresentada ao usuário
 
 ---
 
@@ -186,7 +491,7 @@ mas exige acompanhamento preventivo estruturado.
 
 - Python 3.12+
 - Conta no Kaggle (para download do dataset)
-- Chave de API da OpenAI (para a Parte 2)
+- Chave de API da OpenAI (para integração com Gemini)
 
 ### 1. Clone o repositório
 
@@ -198,7 +503,7 @@ cd cardio-ai/src/fase6
 ### 2. Instale as dependências
 
 ```bash
-pip install numpy pandas polars pyarrow scikit-learn matplotlib seaborn joblib openai-agents pydantic
+pip install numpy pandas polars pyarrow scikit-learn matplotlib seaborn joblib pydantic openai
 ```
 
 ### 3. Baixe o dataset
@@ -209,7 +514,7 @@ Acesse https://www.kaggle.com/datasets/sulianova/cardiovascular-disease-dataset,
 fase6/dataset/cardio_train.csv
 ```
 
-### 4. Configure a chave da OpenAI (apenas para Parte 2)
+### 4. Configure a chave da OpenAI
 
 **Windows (PowerShell):**
 ```powershell
@@ -242,10 +547,10 @@ O script irá:
 > ⚠️ Execute a Parte 1 antes para gerar o modelo.
 
 ```bash
-python main_parte2.py
+python main_multiagent.py
 ```
 
-O script irá acionar o pipeline multiagente para dois pacientes de exemplo (Carlos e Ana) e exibir a recomendação final no terminal.
+O script irá acionar o pipeline multiagente e exibir a recomendação final no terminal.
 
 ---
 
@@ -258,12 +563,10 @@ O script irá acionar o pipeline multiagente para dois pacientes de exemplo (Car
 | `GridSearchCV` | Otimização de hiperparâmetros com validação cruzada |
 | `polars` | Manipulação eficiente de dados |
 | `joblib` | Serialização do modelo treinado |
-| `openai-agents` | Framework multiagente com handoffs e tools |
 | `pydantic` | Validação de schemas de entrada e saída |
+| `openai` | Integração com Gemini para formatação de texto |
 | `matplotlib` / `seaborn` | Visualizações e gráficos |
 
 ---
-
-
 
 > 💡 Este projeto tem fins acadêmicos. As recomendações geradas são baseadas em dados sintéticos e **não substituem orientação médica profissional**.
