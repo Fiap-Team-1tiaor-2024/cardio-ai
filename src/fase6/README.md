@@ -11,6 +11,12 @@ O sistema combina um modelo de Machine Learning supervisionado com uma arquitetu
 
 ---
 
+## 📄 Relatórios de Entrega
+
+Você pode consultar os relatórios da parte 1 e 2 do projeto na pasta `/docs`.
+
+---
+
 ## 📋 Sumário
 
 - [Visão Geral](#visão-geral)
